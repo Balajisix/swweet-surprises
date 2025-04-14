@@ -22,7 +22,7 @@ function ShoppingCheckout() {
   const { razorpayOrder, orderId } = useSelector((state) => state.shopOrder);
   const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
   const [isPaymentStart, setIsPaymentStart] = useState(false);
-  const [checkoutStep, setCheckoutStep] = useState(1); // 1: Review Cart, 2: Address, 3: Payment
+  const [checkoutStep, setCheckoutStep] = useState(1);
   const dispatch = useDispatch();
   const { toast } = useToast();
 
@@ -100,17 +100,15 @@ function ShoppingCheckout() {
   // Whenever we get a new razorpayOrder from the store, open the Razorpay checkout
   useEffect(() => {
     if (razorpayOrder) {
-      // Make sure the script is available on window
       if (typeof window !== "undefined" && window.Razorpay) {
         const options = {
-          key: 'rzp_test_BN58I09Ntf1QYq', // your public Razorpay key
-          amount: razorpayOrder.amount, // amount is in paise
+          key: 'rzp_test_BN58I09Ntf1QYq',
+          amount: razorpayOrder.amount,
           currency: razorpayOrder.currency,
           name: "Sweet Surprises",
           description: "Delightful treats delivered to your door",
-          order_id: razorpayOrder.id, // Razorpay order ID
+          order_id: razorpayOrder.id,
           handler: function (response) {
-            // response contains razorpay_payment_id, razorpay_order_id, and razorpay_signature
             dispatch(
               capturePayment({
                 paymentId: response.razorpay_payment_id,
@@ -184,12 +182,7 @@ function ShoppingCheckout() {
   };
 
   return (
-    // Use overflow-hidden or overflow-x-hidden on the *entire* container:
     <div className="relative min-h-screen w-full bg-gradient-to-br from-pink-50 via-white to-purple-50 overflow-x-hidden">
-      {/* 
-        Decorative elements with media-query-based negative margins 
-        so they don't push horizontally on small screens.
-      */}
       <div className="absolute top-0 right-0 w-1/4 h-64 bg-pink-100 rounded-full md:-mr-12 md:-mt-32 -mr-0 -mt-0 opacity-50"></div>
       <div className="absolute bottom-0 left-0 w-1/3 h-64 bg-purple-100 rounded-full md:-ml-16 md:-mb-32 -ml-0 -mb-0 opacity-50"></div>
 
@@ -281,10 +274,9 @@ function ShoppingCheckout() {
 
         {/* Content Section */}
         <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 mb-6 border border-pink-100 relative overflow-hidden">
-          {/* Decorative corner element */}
           <div className="absolute top-0 right-0 w-16 md:w-24 h-16 md:h-24 bg-gradient-to-br from-pink-100 to-transparent rounded-bl-full opacity-80"></div>
 
-          {/* Step 1: Cart Review */}
+          {/* Cart Review */}
           {checkoutStep === 1 && (
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-semibold text-pink-600 mb-4 flex items-center">
@@ -327,7 +319,7 @@ function ShoppingCheckout() {
             </div>
           )}
 
-          {/* Step 2: Address Selection */}
+          {/* Address Selection */}
           {checkoutStep === 2 && (
             <div>
               <h2 className="text-xl md:text-2xl font-semibold text-pink-600 mb-4 flex items-center">
@@ -341,7 +333,7 @@ function ShoppingCheckout() {
             </div>
           )}
 
-          {/* Step 3: Payment */}
+          {/* Payment */}
           {checkoutStep === 3 && (
             <div>
               <h2 className="text-xl md:text-2xl font-semibold text-pink-600 mb-4 md:mb-6 flex items-center">
