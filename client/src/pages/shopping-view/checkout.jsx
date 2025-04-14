@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { createNewOrder, capturePayment } from "@/store/shop/order-slice";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+const dotenv = require('dotenv');
+dotenv.config();
 
 function ShoppingCheckout() {
   const { cartItems } = useSelector((state) => state.shopCart);
