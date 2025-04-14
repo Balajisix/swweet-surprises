@@ -23,15 +23,20 @@ function AuthLogin() {
 
   function onSubmit(event) {
     event.preventDefault();
-
+  
     dispatch(loginUser(formData)).then((data) => {
       if (data?.payload?.success) {
         toast({
           title: data?.payload?.message,
         });
-
-        // ✅ navigate to the intended page after login
-        navigate(from, { replace: true });
+  
+        const userType = data?.payload?.user?.userType; // or user?.role, depending on your backend
+  
+        if (userType === "admin") {
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          navigate(from, { replace: true });
+        }
       } else {
         toast({
           title: data?.payload?.message,
