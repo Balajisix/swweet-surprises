@@ -3,7 +3,7 @@ import axios from "axios";
 const BACKEND_URL = "https://backend-api-ten-sigma.vercel.app";
 
 const initialState = {
-  approvalURL: null,
+  razorpayOrder: null, // renamed from approvalURL
   isLoading: false,
   orderId: null,
   orderList: [],
@@ -17,23 +17,22 @@ export const createNewOrder = createAsyncThunk(
       `${BACKEND_URL}/api/shop/order/create`,
       orderData
     );
-
     return response.data;
   }
 );
 
 export const capturePayment = createAsyncThunk(
   "/order/capturePayment",
-  async ({ paymentId, payerId, orderId }) => {
+  async ({ paymentId, razorpayOrderId, razorpaySignature, orderId }) => {
     const response = await axios.post(
       `${BACKEND_URL}/api/shop/order/capture`,
       {
         paymentId,
-        payerId,
+        razorpayOrderId,
+        razorpaySignature,
         orderId,
       }
     );
-
     return response.data;
   }
 );
@@ -44,7 +43,6 @@ export const getAllOrdersByUserId = createAsyncThunk(
     const response = await axios.get(
       `${BACKEND_URL}/api/shop/order/list/${userId}`
     );
-
     return response.data;
   }
 );
@@ -55,7 +53,6 @@ export const getOrderDetails = createAsyncThunk(
     const response = await axios.get(
       `${BACKEND_URL}/api/shop/order/details/${id}`
     );
-
     return response.data;
   }
 );
@@ -75,7 +72,8 @@ const shoppingOrderSlice = createSlice({
       })
       .addCase(createNewOrder.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.approvalURL = action.payload.approvalURL;
+        // Expect the backend payload to include a field named razorpayOrder
+        state.razorpayOrder = action.payload.razorpayOrder;
         state.orderId = action.payload.orderId;
         sessionStorage.setItem(
           "currentOrderId",
@@ -84,7 +82,7 @@ const shoppingOrderSlice = createSlice({
       })
       .addCase(createNewOrder.rejected, (state) => {
         state.isLoading = false;
-        state.approvalURL = null;
+        state.razorpayOrder = null;
         state.orderId = null;
       })
       .addCase(getAllOrdersByUserId.pending, (state) => {
