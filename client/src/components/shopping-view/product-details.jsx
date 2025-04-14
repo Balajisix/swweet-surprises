@@ -226,7 +226,7 @@ function ProductDetailsPage() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center text-sm text-gray-500">
           <button 
-            onClick={() => navigate('/shop')}
+            onClick={() => navigate('/shop/home')}
             className="flex items-center hover:text-pink-600 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />

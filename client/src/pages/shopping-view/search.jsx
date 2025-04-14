@@ -1,29 +1,24 @@
-import ProductDetailsDialog from "@/components/shopping-view/product-details";
 import ShoppingProductTile from "@/components/shopping-view/product-tile";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 import { fetchProductDetails } from "@/store/shop/products-slice";
-import {
-  getSearchResults,
-  resetSearchResults,
-} from "@/store/shop/search-slice";
+import { getSearchResults, resetSearchResults } from "@/store/shop/search-slice";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 function SearchProducts() {
   const [keyword, setKeyword] = useState("");
-  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
   const { searchResults } = useSelector((state) => state.shopSearch);
-  const { productDetails } = useSelector((state) => state.shopProducts);
-
   const { user } = useSelector((state) => state.auth);
-
   const { cartItems } = useSelector((state) => state.shopCart);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // When the keyword changes, update the URL and fetch search results.
   useEffect(() => {
     if (keyword && keyword.trim() !== "" && keyword.trim().length > 3) {
       setTimeout(() => {
@@ -34,12 +29,11 @@ function SearchProducts() {
       setSearchParams(new URLSearchParams(`?keyword=${keyword}`));
       dispatch(resetSearchResults());
     }
-  }, [keyword]);
+  }, [keyword, dispatch, setSearchParams]);
 
+  // Add to cart handler
   function handleAddtoCart(getCurrentProductId, getTotalStock) {
-    console.log(cartItems);
-    let getCartItems = cartItems.items || [];
-
+    const getCartItems = cartItems.items || [];
     if (getCartItems.length) {
       const indexOfCurrentItem = getCartItems.findIndex(
         (item) => item.productId === getCurrentProductId
@@ -51,7 +45,6 @@ function SearchProducts() {
             title: `Only ${getQuantity} quantity can be added for this item`,
             variant: "destructive",
           });
-
           return;
         }
       }
@@ -73,23 +66,18 @@ function SearchProducts() {
     });
   }
 
+  // When a product tile is clicked, fetch its details and navigate to the product page.
   function handleGetProductDetails(getCurrentProductId) {
-    console.log(getCurrentProductId);
-    dispatch(fetchProductDetails(getCurrentProductId));
+    dispatch(fetchProductDetails(getCurrentProductId)).then(() => {
+      navigate("/shop/productpage");
+    });
   }
-
-  useEffect(() => {
-    if (productDetails !== null) setOpenDetailsDialog(true);
-  }, [productDetails]);
-
-  console.log(searchResults, "searchResults");
 
   return (
     <div className="container mx-auto md:px-6 px-4 py-8 bg-gradient-to-r from-pink-100 to-purple-200 min-h-screen">
       {/* Search Input Section */}
       <div className="flex justify-center mb-8">
         <div className="relative w-full flex items-center">
-          {/* Search Icon */}
           <span className="absolute left-4 text-gray-700">
             <i className="fas fa-search"></i>
           </span>
@@ -102,42 +90,33 @@ function SearchProducts() {
           />
         </div>
       </div>
-  
-      {/* No Results Found Section */}
-      {!searchResults.length ? (
+
+      {/* If there are no results */}
+      {(!searchResults || !searchResults.length) && (
         <h1 className="text-5xl font-extrabold text-center text-pink-600 animate-pulse">
           No results found!
         </h1>
-      ) : null}
-  
+      )}
+
       {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-8">
-        {searchResults.map((item) => (
-          <div
-            key={item.id}
-            className="relative group overflow-hidden rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:bg-gradient-to-r from-pink-500 to-purple-500 hover:cursor-pointer"
-          >
-            <ShoppingProductTile
-              handleAddtoCart={handleAddtoCart}
-              product={item}
-              handleGetProductDetails={handleGetProductDetails}
-            />
-          </div>
-        ))}
+        {searchResults &&
+          searchResults.map((item) => (
+            <div
+              key={item.id}
+              className="relative group overflow-hidden rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:bg-gradient-to-r from-pink-500 to-purple-500 hover:cursor-pointer"
+              onClick={() => handleGetProductDetails(item.id)}
+            >
+              <ShoppingProductTile
+                handleAddtoCart={handleAddtoCart}
+                product={item}
+                handleGetProductDetails={handleGetProductDetails}
+              />
+            </div>
+          ))}
       </div>
-  
-      {/* Product Details Dialog */}
-      <ProductDetailsDialog
-        open={openDetailsDialog}
-        setOpen={setOpenDetailsDialog}
-        productDetails={productDetails}
-      />
     </div>
   );
-  
-  
-  
-  
 }
 
 export default SearchProducts;
