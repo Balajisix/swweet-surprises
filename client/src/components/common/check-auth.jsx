@@ -7,11 +7,7 @@ function CheckAuth({ isAuthenticated, authChecked, isLoading, user, children }) 
   if (isLoading || !authChecked) {
     return <div>Loading...</div>; // Or your skeleton/loader component
   }
-
-  if (!isAuthenticated){
-    return <Navigate to="/auth/login" />
-  }
-
+  
   console.log(location.pathname, isAuthenticated);
 
   // Allow unauthenticated access to specific public routes
