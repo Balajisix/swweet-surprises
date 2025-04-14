@@ -49,15 +49,14 @@ function App() {
             <CheckAuth
               isAuthenticated={isAuthenticated}
               user={user}
-              authChecked={authChecked}
-              isLoading={isLoading}
             ></CheckAuth>
           }
         />
         <Route
           path="/auth"
           element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+            <CheckAuth isAuthenticated={isAuthenticated} user={user} isLoading={isLoading}
+            authChecked={authChecked}>
               <AuthLayout />
             </CheckAuth>
           }
