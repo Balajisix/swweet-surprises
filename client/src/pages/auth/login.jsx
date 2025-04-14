@@ -30,7 +30,7 @@ function AuthLogin() {
           title: data?.payload?.message,
         });
   
-        const userType = data?.payload?.user?.userType; // or user?.role, depending on your backend
+        const userType = data?.payload?.user?.role; // or user?.role, depending on your backend
   
         if (userType === "admin") {
           navigate("/admin/dashboard", { replace: true });
