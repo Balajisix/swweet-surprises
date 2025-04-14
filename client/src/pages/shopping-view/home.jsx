@@ -33,14 +33,14 @@ const occasionsWithIcon = [
 
 function ShoppingHome() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { productList, productDetails } = useSelector((state) => state.shopProducts);
+  const { productList } = useSelector((state) => state.shopProducts);
   const { featureImageList } = useSelector((state) => state.commonFeature);
-  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Navigate with filtered parameters for listing page
   function handleNavigateToListingPage(getCurrentItem, section) {
     sessionStorage.removeItem("filters");
     const currentFilter = {
@@ -50,8 +50,12 @@ function ShoppingHome() {
     navigate(`/shop/listing`);
   }
 
+  // Fetch product details and navigate to the product page.
   function handleGetProductDetails(getCurrentProductId) {
-    dispatch(fetchProductDetails(getCurrentProductId));
+    dispatch(fetchProductDetails(getCurrentProductId)).then(() => {
+      // Navigate to /shop/productspage after the details are fetched.
+      navigate(`/shop/productpage`);
+    });
   }
 
   function handleAddtoCart(getCurrentProductId) {
@@ -71,10 +75,7 @@ function ShoppingHome() {
     });
   }
 
-  useEffect(() => {
-    if (productDetails !== null) setOpenDetailsDialog(true);
-  }, [productDetails]);
-
+  // Auto slide feature images every 8 seconds.
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % (featureImageList?.length || 3));
@@ -90,7 +91,7 @@ function ShoppingHome() {
     dispatch(getFeatureImages());
   }, [dispatch]);
 
-  // Placeholder banners (replace with your actual images)
+  // Banner images and copy (update with your actual images and texts)
   const banners = [
     { 
       image: bannerOne, 
@@ -111,7 +112,7 @@ function ShoppingHome() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fff5f8]">
-      {/* Hero Banner - Responsive */}
+      {/* Hero Banner */}
       <div className="relative w-full overflow-hidden bg-gradient-to-r from-pink-100 to-pink-200">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center py-8 md:py-12">
@@ -139,15 +140,12 @@ function ShoppingHome() {
                 </Button>
               </div>
             </div>
-            
-            {/* Banner image - hidden on very small screens */}
+            {/* Banner image */}
             <div className="w-full md:w-1/2 relative h-48 sm:h-64 md:h-80">
               {banners.map((banner, index) => (
                 <div 
                   key={index}
-                  className={`absolute inset-0 transition-opacity duration-1000 ${
-                    index === currentSlide ? "opacity-100" : "opacity-0"
-                  }`}
+                  className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"}`}
                 >
                   <img
                     src={banner.image}
@@ -158,16 +156,13 @@ function ShoppingHome() {
               ))}
             </div>
           </div>
-          
           {/* Banner controls */}
           <div className="flex justify-center md:justify-end gap-2 pb-4">
             {banners.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full ${
-                  currentSlide === index ? "bg-pink-600" : "bg-pink-300"
-                }`}
+                className={`w-3 h-3 rounded-full ${currentSlide === index ? "bg-pink-600" : "bg-pink-300"}`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -175,7 +170,7 @@ function ShoppingHome() {
         </div>
       </div>
 
-      {/* Categories Section with Attractive Cards */}
+      {/* Categories Section */}
       <section className="py-8 md:py-12 bg-[#fff5f8]">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-[#d63384]">
@@ -218,9 +213,11 @@ function ShoppingHome() {
                     handleAddtoCart={handleAddtoCart}
                   />
                 ))
-              : Array(4).fill(0).map((_, index) => (
-                  <div key={index} className="bg-pink-50 animate-pulse rounded-lg h-64"></div>
-                ))}
+              : Array(4)
+                  .fill(0)
+                  .map((_, index) => (
+                    <div key={index} className="bg-pink-50 animate-pulse rounded-lg h-64"></div>
+                  ))}
           </div>
           {productList && productList.length > 8 && (
             <div className="text-center mt-8">
@@ -294,11 +291,12 @@ function ShoppingHome() {
         </div>
       </section>
 
-      <ProductDetailsDialog
+      {/* Product details dialog is no longer auto-opened since we navigate to a product page */}
+      {/* <ProductDetailsDialog
         open={openDetailsDialog}
         setOpen={setOpenDetailsDialog}
         productDetails={productDetails}
-      />
+      /> */}
     </div>
   );
 }
