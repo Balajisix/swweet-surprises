@@ -19,6 +19,9 @@ import {
   fetchProductDetails,
 } from "@/store/shop/products-slice";
 
+// Add this line:
+import { ArrowUpDownIcon } from "lucide-react"; // <-- IMPORTANT
+
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
 
@@ -125,10 +128,11 @@ function ShoppingListing() {
   }, [filters, setSearchParams]);
 
   useEffect(() => {
-    if (filters !== null && sort !== null)
+    if (filters !== null && sort !== null) {
       dispatch(
         fetchAllFilteredProducts({ filterParams: filters, sortParams: sort })
       );
+    }
   }, [dispatch, sort, filters]);
 
   return (
