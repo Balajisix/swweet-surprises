@@ -3,8 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Package, MapPin, Heart, Settings, CreditCard, Gift } from "lucide-react";
 import Address from "@/components/shopping-view/address";
 import ShoppingOrders from "@/components/shopping-view/orders";
+import { useSelector } from "react-redux";
 
-function ShoppingAccount({ userName = "Valued Customer" }) {
+function ShoppingAccount() {
+  const { user } = useSelector((state) => state.auth);
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState("orders");
   
@@ -33,7 +35,7 @@ function ShoppingAccount({ userName = "Valued Customer" }) {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-6 md:mb-0 text-center md:text-left">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                Welcome back, {userName}!
+                Welcome back, {user?.userName}!
               </h1>
               <p className="text-gray-600 mt-2 text-lg">Manage your sweet experiences</p>
             </div>
@@ -144,7 +146,7 @@ function ShoppingAccount({ userName = "Valued Customer" }) {
                         <label className="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
                         <input 
                           type="text" 
-                          value={userName} 
+                          value={user?.userName} 
                           className="w-full p-2 border border-pink-200 rounded-md focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
                         />
                       </div>
