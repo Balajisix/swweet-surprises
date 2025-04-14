@@ -1,3 +1,6 @@
+import bannerOne from "../../assets/banner-1.webp";
+import bannerTwo from "../../assets/banner-2.png";
+import bannerThree from "../../assets/banner-1.webp";
 import { Button } from "@/components/ui/button";
 import { Frame, WalletCards, ChevronLeftIcon, ChevronRightIcon, Key, Book, Coffee, CalendarHeart, Gem, Handshake, CandyCane, Gift } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -90,17 +93,17 @@ function ShoppingHome() {
   // Placeholder banners (replace with your actual images)
   const banners = [
     { 
-      image: "/api/placeholder/800/400", 
+      image: bannerOne, 
       title: "Sweet Surprises For Your Loved Ones",
       subtitle: "Personalized gifts for every special moment"
     },
     { 
-      image: "/api/placeholder/800/400", 
+      image: bannerTwo, 
       title: "Create Lasting Memories",
       subtitle: "Turn your favorite moments into treasured keepsakes"
     },
     { 
-      image: "/api/placeholder/800/400", 
+      image: bannerThree, 
       title: "Special Occasion Gifts",
       subtitle: "Celebrate every milestone with unique personalized gifts"
     }
