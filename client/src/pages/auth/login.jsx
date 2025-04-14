@@ -4,7 +4,7 @@ import { loginFormControls } from "@/config";
 import { loginUser } from "@/store/auth-slice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // ✅ added useNavigate & useLocation
 
 const initialState = {
   email: "",
@@ -15,6 +15,11 @@ function AuthLogin() {
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
   const { toast } = useToast();
+  const navigate = useNavigate(); // ✅ added
+  const location = useLocation(); // ✅ added
+
+  // ✅ get the previous location (or fallback to /shop/home)
+  const from = location.state?.from?.pathname || "/shop/home";
 
   function onSubmit(event) {
     event.preventDefault();
@@ -24,6 +29,9 @@ function AuthLogin() {
         toast({
           title: data?.payload?.message,
         });
+
+        // ✅ navigate to the intended page after login
+        navigate(from, { replace: true });
       } else {
         toast({
           title: data?.payload?.message,
@@ -58,7 +66,7 @@ function AuthLogin() {
       />
       <div className="text-center mt-4">
         <Link
-          to="/auth/forgot-password" // Replace with the actual route for the reset password page
+          to="/auth/forgot-password"
           className="text-sm text-pink-600 hover:underline"
         >
           Forgot password?

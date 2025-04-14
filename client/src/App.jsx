@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from "react-router-dom";
 import PaypalReturnPage from "./pages/shopping-view/paypal-return";
 import PaymentSuccessPage from "./pages/shopping-view/payment-success";
 import SearchProducts from "./pages/shopping-view/search";
@@ -31,6 +32,7 @@ function App() {
     (state) => state.auth
   );
   const dispatch = useDispatch();
+  const location = useLocation();
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -66,7 +68,7 @@ function App() {
               isAuthenticated ? (
                 <ShoppingCheckout />
               ) : (
-                <Navigate to="/auth/login" replace />
+                <Navigate to="/auth/login" state={{ from: location }} replace />
               )
             }
           />
