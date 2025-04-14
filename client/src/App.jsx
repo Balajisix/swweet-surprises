@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import AuthLayout from "./components/auth/layout";
 import AuthLogin from "./pages/auth/login";
-import ForgotPass from "./pages/auth/ForgotPassword"
+import ForgotPass from "./pages/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import AuthRegister from "./pages/auth/register";
 import AdminLayout from "./components/admin-view/layout";
@@ -43,20 +43,25 @@ function App() {
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <Routes>
+        {/* Root route should load AuthLayout */}
         <Route
           path="/"
           element={
             <CheckAuth
               isAuthenticated={isAuthenticated}
               user={user}
-            ></CheckAuth>
+              isLoading={isLoading}
+              authChecked={authChecked}
+            >
+              <AuthLayout />
+            </CheckAuth>
           }
         />
+
         <Route
           path="/auth"
           element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user} isLoading={isLoading}
-            authChecked={authChecked}>
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <AuthLayout />
             </CheckAuth>
           }
@@ -65,8 +70,9 @@ function App() {
           <Route path="register" element={<AuthRegister />} />
           <Route path="forgot-password" element={<ForgotPass />} />
         </Route>
+
         <Route path="reset-password/:token" element={<ResetPassword />} />
-        
+
         <Route
           path="/admin"
           element={
@@ -80,10 +86,15 @@ function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="features" element={<AdminFeatures />} />
         </Route>
+
         <Route
           path="/shop"
           element={
-            <CheckAuth isAuthenticated={isAuthenticated} isLoading={isLoading} user={user}>
+            <CheckAuth
+              isAuthenticated={isAuthenticated}
+              isLoading={isLoading}
+              user={user}
+            >
               <ShoppingLayout />
             </CheckAuth>
           }
@@ -97,6 +108,7 @@ function App() {
           <Route path="payment-success" element={<PaymentSuccessPage />} />
           <Route path="search" element={<SearchProducts />} />
         </Route>
+
         <Route path="/unauth-page" element={<UnauthPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
