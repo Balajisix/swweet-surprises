@@ -36,49 +36,28 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  if (isLoading) return <Skeleton className="w-[800] bg-black h-[600px]" />;
-
-  console.log(isLoading, user);
+  if (isLoading || !authChecked)
+    return <Skeleton className="w-full h-screen bg-black" />;
 
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <Routes>
-        {/* Root route should load AuthLayout */}
-        <Route
-          path="/"
-          element={
-            <CheckAuth
-              isAuthenticated={isAuthenticated}
-              user={user}
-              isLoading={isLoading}
-              authChecked={authChecked}
-            >
-              <AuthLayout />
-            </CheckAuth>
-          }
-        />
-
-        <Route
-          path="/auth"
-          element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user} isLoading={isLoading}
-            authChecked={authChecked}>
-              <AuthLayout />
-            </CheckAuth>
-          }
-        >
+        {/* Public Auth Layout */}
+        <Route path="/" element={<AuthLayout />} />
+        <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<AuthLogin />} />
           <Route path="register" element={<AuthRegister />} />
           <Route path="forgot-password" element={<ForgotPass />} />
         </Route>
 
+        {/* Reset Password route */}
         <Route path="reset-password/:token" element={<ResetPassword />} />
 
+        {/* Admin Panel - Protected */}
         <Route
           path="/admin"
           element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user} isLoading={isLoading}
-            authChecked={authChecked}>
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <AdminLayout />
             </CheckAuth>
           }
@@ -89,15 +68,11 @@ function App() {
           <Route path="features" element={<AdminFeatures />} />
         </Route>
 
+        {/* Shop View - Protected */}
         <Route
           path="/shop"
           element={
-            <CheckAuth
-              isAuthenticated={isAuthenticated}
-              isLoading={isLoading}
-              authChecked={authChecked}
-              user={user}
-            >
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <ShoppingLayout />
             </CheckAuth>
           }
