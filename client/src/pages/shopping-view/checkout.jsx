@@ -199,7 +199,7 @@ function ShoppingCheckout() {
         <div className="flex items-center justify-center mb-2">
           <Gift className="text-pink-500 mr-2" size={28} />
           <h1 className="text-2xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600">
-            Sweet Surprises
+            Swweet Surprises
           </h1>
         </div>
         <p className="text-center text-pink-400 font-medium text-sm md:text-base">
@@ -461,7 +461,7 @@ function ShoppingCheckout() {
 
         {/* Footer */}
         <div className="text-center text-pink-400 text-xs md:text-sm mb-6 md:mb-8">
-          Sweet Surprises • Spreading joy, one sweet at a time
+          Swweet Surprises • Spreading joy, one sweet at a time
         </div>
       </div>
     </div>
