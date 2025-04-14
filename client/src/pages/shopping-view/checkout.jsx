@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { createNewOrder, capturePayment } from "@/store/shop/order-slice";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ function ShoppingCheckout() {
   const [checkoutStep, setCheckoutStep] = useState(1);
   // New state: paymentMethod can be "Razorpay" (online) or "COD"
   const [paymentMethod, setPaymentMethod] = useState("Razorpay");
+  // New state to flag when the order is completed along with order details (if needed)
+  const [orderCompleted, setOrderCompleted] = useState(false);
   const dispatch = useDispatch();
   const { toast } = useToast();
 
@@ -41,7 +44,7 @@ function ShoppingCheckout() {
         )
       : 0;
 
-  // Create a new order on the backend for both payment methods.
+  // This function handles both COD and Razorpay flows.
   const handleInitiatePayment = () => {
     if (!cartItems || cartItems.items.length === 0) {
       toast({
@@ -58,7 +61,6 @@ function ShoppingCheckout() {
       return;
     }
 
-    // Prepare order payload (works for both COD and online payment)
     const orderData = {
       userId: user?.id,
       cartId: cartItems?._id,
@@ -90,8 +92,8 @@ function ShoppingCheckout() {
       razorpaySignature: "",
     };
 
-    // If COD, simply create the order without invoking Razorpay.
     if (paymentMethod === "COD") {
+      // For COD, create order immediately without Razorpay integration.
       dispatch(createNewOrder(orderData)).then((data) => {
         if (data?.payload?.success) {
           toast({
@@ -100,7 +102,8 @@ function ShoppingCheckout() {
               "Your order is confirmed and will be processed shortly.",
             variant: "default",
           });
-          // Optionally reset state or navigate to order details.
+          // Mark order as complete so that UI updates accordingly.
+          setOrderCompleted(true);
         } else {
           toast({
             title: "COD Order creation failed.",
@@ -109,7 +112,7 @@ function ShoppingCheckout() {
         }
       });
     } else if (paymentMethod === "Razorpay") {
-      // Initiate Razorpay payment workflow.
+      // For Razorpay, create order and then trigger payment process.
       dispatch(createNewOrder(orderData)).then((data) => {
         if (data?.payload?.success) {
           setIsPaymentStart(true);
@@ -120,12 +123,12 @@ function ShoppingCheckout() {
     }
   };
 
-  // Listen for new Razorpay order and then open Razorpay checkout
+  // When a Razorpay order exists and the method is online, launch Razorpay checkout.
   useEffect(() => {
     if (razorpayOrder && paymentMethod === "Razorpay") {
       if (typeof window !== "undefined" && window.Razorpay) {
         const options = {
-          key: 'rzp_test_BN58I09Ntf1QYq',
+          key: process.env.RZP_ID,
           amount: razorpayOrder.amount,
           currency: razorpayOrder.currency,
           name: "Sweet Surprises",
@@ -146,6 +149,8 @@ function ShoppingCheckout() {
                   description: "Your sweet surprises are on the way!",
                   variant: "default",
                 });
+                // Mark order as complete in the UI.
+                setOrderCompleted(true);
               } else {
                 toast({
                   title: "Payment verification failed.",
@@ -173,9 +178,17 @@ function ShoppingCheckout() {
         console.error("Razorpay script not loaded. Please check index.html.");
       }
     }
-  }, [razorpayOrder, dispatch, orderId, user, currentSelectedAddress, toast, paymentMethod]);
+  }, [
+    razorpayOrder,
+    dispatch,
+    orderId,
+    user,
+    currentSelectedAddress,
+    toast,
+    paymentMethod,
+  ]);
 
-  // Navigation functions for checkout steps
+  // Navigation functions
   const goToNextStep = () => {
     if (checkoutStep === 1 && (!cartItems || cartItems.items.length === 0)) {
       toast({
@@ -202,6 +215,34 @@ function ShoppingCheckout() {
     }
   };
 
+  // If order is completed, show a confirmation screen.
+  if (orderCompleted) {
+    return (
+      <div className="min-h-screen w-full flex flex-col justify-center items-center bg-gradient-to-br from-pink-50 via-white to-purple-50">
+        <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+          <Gift className="text-pink-500 mx-auto mb-4" size={48} />
+          <h1 className="text-2xl font-bold text-pink-600 mb-2">
+            Order Confirmed!
+          </h1>
+          <p className="text-gray-600 mb-4">
+            Your order has been successfully placed.
+          </p>
+          <p className="text-gray-600 mb-4">
+            Order Number: <span className="font-bold">{orderId}</span>
+          </p>
+          {/* You can navigate to order details, home, or elsewhere */}
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl px-4 py-2"
+          >
+            Continue Shopping
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, render the checkout flow.
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-br from-pink-50 via-white to-purple-50 overflow-x-hidden">
       <div className="absolute top-0 right-0 w-1/4 h-64 bg-pink-100 rounded-full md:-mr-12 md:-mt-32 -mr-0 -mt-0 opacity-50"></div>
@@ -392,7 +433,7 @@ function ShoppingCheckout() {
                       name="paymentMethod"
                       value="Razorpay"
                       checked={paymentMethod === "Razorpay"}
-                      onChange={() => setPaymentMethod("Razorpay")}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
                       className="form-radio text-pink-600"
                     />
                     <span>Online Payment</span>
@@ -403,7 +444,7 @@ function ShoppingCheckout() {
                       name="paymentMethod"
                       value="COD"
                       checked={paymentMethod === "COD"}
-                      onChange={() => setPaymentMethod("COD")}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
                       className="form-radio text-pink-600"
                     />
                     <span>Cash on Delivery</span>
@@ -423,16 +464,13 @@ function ShoppingCheckout() {
                       {currentSelectedAddress.address}
                     </p>
                     <p>
-                      {currentSelectedAddress.city} -{" "}
-                      {currentSelectedAddress.pincode}
+                      {currentSelectedAddress.city} - {currentSelectedAddress.pincode}
                     </p>
                     <p className="mt-1 flex items-center">
                       <span className="flex-shrink-0 w-4 h-4 bg-pink-100 rounded-full text-pink-500 flex items-center justify-center mr-2 text-xs">
                         <Check size={10} />
                       </span>
-                      <span className="break-all">
-                        {currentSelectedAddress.phone}
-                      </span>
+                      <span className="break-all">{currentSelectedAddress.phone}</span>
                     </p>
                     {currentSelectedAddress.notes && (
                       <p className="mt-2 text-sm bg-pink-50 p-2 rounded border border-pink-100 break-words">
