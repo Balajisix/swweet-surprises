@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import AuthLayout from "./components/auth/layout";
 import AuthLogin from "./pages/auth/login";
 import ForgotPass from "./pages/auth/ForgotPassword";
@@ -36,16 +36,49 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  if (isLoading || !authChecked) return <Skeleton className="w-[800] bg-black h-[600px]" />;
-
-  console.log(isLoading, user);
+  if (isLoading || !authChecked)
+    return <Skeleton className="w-[800px] bg-black h-[600px]" />;
 
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <Routes>
-        {/* Root route should load AuthLayout */}
+        {/* 🚀 Redirect root "/" to shop/home */}
+        <Route path="/" element={<Navigate to="/shop/home" replace />} />
+
+        {/* 🔐 Auth Routes */}
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route index element={<Navigate to="login" replace />} />
+          <Route path="login" element={<AuthLogin />} />
+          <Route path="register" element={<AuthRegister />} />
+          <Route path="forgot-password" element={<ForgotPass />} />
+        </Route>
+
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        {/* 🛒 Shopping Routes */}
+        <Route path="/shop" element={<ShoppingLayout />}>
+          <Route path="home" element={<ShoppingHome />} />
+          <Route path="productpage" element={<ProductDetailsPage />} />
+          <Route path="listing" element={<ShoppingListing />} />
+          <Route
+            path="checkout"
+            element={
+              isAuthenticated ? (
+                <ShoppingCheckout />
+              ) : (
+                <Navigate to="/auth/login" replace />
+              )
+            }
+          />
+          <Route path="account" element={<ShoppingAccount />} />
+          <Route path="paypal-return" element={<PaypalReturnPage />} />
+          <Route path="payment-success" element={<PaymentSuccessPage />} />
+          <Route path="search" element={<SearchProducts />} />
+        </Route>
+
+        {/* 🛠 Admin Routes */}
         <Route
-          path="/"
+          path="/admin"
           element={
             <CheckAuth
               isAuthenticated={isAuthenticated}
@@ -53,32 +86,6 @@ function App() {
               isLoading={isLoading}
               authChecked={authChecked}
             >
-              <AuthLayout />
-            </CheckAuth>
-          }
-        />
-
-        <Route
-          path="/auth"
-          element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user} isLoading={isLoading}
-            authChecked={authChecked}>
-              <AuthLayout />
-            </CheckAuth>
-          }
-        >
-          <Route path="login" element={<AuthLogin />} />
-          <Route path="register" element={<AuthRegister />} />
-          <Route path="forgot-password" element={<ForgotPass />} />
-        </Route>
-
-        <Route path="reset-password/:token" element={<ResetPassword />} />
-
-        <Route
-          path="/admin"
-          element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user} isLoading={isLoading}
-            authChecked={authChecked}>
               <AdminLayout />
             </CheckAuth>
           }
@@ -87,29 +94,6 @@ function App() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="features" element={<AdminFeatures />} />
-        </Route>
-
-        <Route
-          path="/shop"
-          element={
-            <CheckAuth
-              isAuthenticated={isAuthenticated}
-              isLoading={isLoading}
-              authChecked={authChecked}
-              user={user}
-            >
-              <ShoppingLayout />
-            </CheckAuth>
-          }
-        >
-          <Route path="home" element={<ShoppingHome />} />
-          <Route path="productpage" element={<ProductDetailsPage />} />
-          <Route path="listing" element={<ShoppingListing />} />
-          <Route path="checkout" element={<ShoppingCheckout />} />
-          <Route path="account" element={<ShoppingAccount />} />
-          <Route path="paypal-return" element={<PaypalReturnPage />} />
-          <Route path="payment-success" element={<PaymentSuccessPage />} />
-          <Route path="search" element={<SearchProducts />} />
         </Route>
 
         <Route path="/unauth-page" element={<UnauthPage />} />
