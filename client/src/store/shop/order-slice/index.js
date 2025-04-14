@@ -3,7 +3,7 @@ import axios from "axios";
 const BACKEND_URL = "https://backend-api-ten-sigma.vercel.app";
 
 const initialState = {
-  razorpayOrder: null, // renamed from approvalURL
+  razorpayOrder: null, // will be set only for online payments
   isLoading: false,
   orderId: null,
   orderList: [],
@@ -72,8 +72,9 @@ const shoppingOrderSlice = createSlice({
       })
       .addCase(createNewOrder.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Expect the backend payload to include a field named razorpayOrder
-        state.razorpayOrder = action.payload.razorpayOrder;
+        // When a COD order is created, the backend may not return a razorpayOrder,
+        // so set it explicitly to null if missing.
+        state.razorpayOrder = action.payload.razorpayOrder || null;
         state.orderId = action.payload.orderId;
         sessionStorage.setItem(
           "currentOrderId",

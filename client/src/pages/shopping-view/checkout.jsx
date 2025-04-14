@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
 import { createNewOrder, capturePayment } from "@/store/shop/order-slice";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,8 @@ function ShoppingCheckout() {
   const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
   const [isPaymentStart, setIsPaymentStart] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState(1);
+  // New state: paymentMethod can be "Razorpay" (online) or "COD"
+  const [paymentMethod, setPaymentMethod] = useState("Razorpay");
   const dispatch = useDispatch();
   const { toast } = useToast();
 
@@ -40,8 +41,8 @@ function ShoppingCheckout() {
         )
       : 0;
 
-  // Create a new order on the backend and prepare for Razorpay payment
-  const handleInitiateRazorpayPayment = () => {
+  // Create a new order on the backend for both payment methods.
+  const handleInitiatePayment = () => {
     if (!cartItems || cartItems.items.length === 0) {
       toast({
         title: "Your cart is empty. Please add items to proceed.",
@@ -57,6 +58,7 @@ function ShoppingCheckout() {
       return;
     }
 
+    // Prepare order payload (works for both COD and online payment)
     const orderData = {
       userId: user?.id,
       cartId: cartItems?._id,
@@ -79,7 +81,7 @@ function ShoppingCheckout() {
         notes: currentSelectedAddress?.notes,
       },
       orderStatus: "Pending",
-      paymentMethod: "Razorpay",
+      paymentMethod, // "Razorpay" or "COD"
       paymentStatus: "Pending",
       totalAmount: totalCartAmount,
       orderDate: new Date(),
@@ -88,18 +90,39 @@ function ShoppingCheckout() {
       razorpaySignature: "",
     };
 
-    dispatch(createNewOrder(orderData)).then((data) => {
-      if (data?.payload?.success) {
-        setIsPaymentStart(true);
-      } else {
-        setIsPaymentStart(false);
-      }
-    });
+    // If COD, simply create the order without invoking Razorpay.
+    if (paymentMethod === "COD") {
+      dispatch(createNewOrder(orderData)).then((data) => {
+        if (data?.payload?.success) {
+          toast({
+            title: "COD Order placed successfully!",
+            description:
+              "Your order is confirmed and will be processed shortly.",
+            variant: "default",
+          });
+          // Optionally reset state or navigate to order details.
+        } else {
+          toast({
+            title: "COD Order creation failed.",
+            variant: "destructive",
+          });
+        }
+      });
+    } else if (paymentMethod === "Razorpay") {
+      // Initiate Razorpay payment workflow.
+      dispatch(createNewOrder(orderData)).then((data) => {
+        if (data?.payload?.success) {
+          setIsPaymentStart(true);
+        } else {
+          setIsPaymentStart(false);
+        }
+      });
+    }
   };
 
-  // Whenever we get a new razorpayOrder from the store, open the Razorpay checkout
+  // Listen for new Razorpay order and then open Razorpay checkout
   useEffect(() => {
-    if (razorpayOrder) {
+    if (razorpayOrder && paymentMethod === "Razorpay") {
       if (typeof window !== "undefined" && window.Razorpay) {
         const options = {
           key: 'rzp_test_BN58I09Ntf1QYq',
@@ -150,9 +173,9 @@ function ShoppingCheckout() {
         console.error("Razorpay script not loaded. Please check index.html.");
       }
     }
-  }, [razorpayOrder, dispatch, orderId, user, currentSelectedAddress, toast]);
+  }, [razorpayOrder, dispatch, orderId, user, currentSelectedAddress, toast, paymentMethod]);
 
-  // Step navigation functions
+  // Navigation functions for checkout steps
   const goToNextStep = () => {
     if (checkoutStep === 1 && (!cartItems || cartItems.items.length === 0)) {
       toast({
@@ -161,7 +184,6 @@ function ShoppingCheckout() {
       });
       return;
     }
-
     if (checkoutStep === 2 && !currentSelectedAddress) {
       toast({
         title: "Please select an address to proceed.",
@@ -169,7 +191,6 @@ function ShoppingCheckout() {
       });
       return;
     }
-
     if (checkoutStep < 3) {
       setCheckoutStep(checkoutStep + 1);
     }
@@ -276,7 +297,7 @@ function ShoppingCheckout() {
         <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 mb-6 border border-pink-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-16 md:w-24 h-16 md:h-24 bg-gradient-to-br from-pink-100 to-transparent rounded-bl-full opacity-80"></div>
 
-          {/* Cart Review */}
+          {/* Step 1: Cart Review */}
           {checkoutStep === 1 && (
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-semibold text-pink-600 mb-4 flex items-center">
@@ -319,7 +340,7 @@ function ShoppingCheckout() {
             </div>
           )}
 
-          {/* Address Selection */}
+          {/* Step 2: Address Selection */}
           {checkoutStep === 2 && (
             <div>
               <h2 className="text-xl md:text-2xl font-semibold text-pink-600 mb-4 flex items-center">
@@ -333,7 +354,7 @@ function ShoppingCheckout() {
             </div>
           )}
 
-          {/* Payment */}
+          {/* Step 3: Payment */}
           {checkoutStep === 3 && (
             <div>
               <h2 className="text-xl md:text-2xl font-semibold text-pink-600 mb-4 md:mb-6 flex items-center">
@@ -358,6 +379,35 @@ function ShoppingCheckout() {
                 <div className="flex justify-between font-bold text-base md:text-lg text-gradient bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                   <span>Total</span>
                   <span>₹{totalCartAmount}</span>
+                </div>
+              </div>
+
+              {/* Payment Method Selection */}
+              <div className="mb-4">
+                <p className="mb-2 font-medium text-pink-700">Select Payment Method</p>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="Razorpay"
+                      checked={paymentMethod === "Razorpay"}
+                      onChange={() => setPaymentMethod("Razorpay")}
+                      className="form-radio text-pink-600"
+                    />
+                    <span>Online Payment</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="COD"
+                      checked={paymentMethod === "COD"}
+                      onChange={() => setPaymentMethod("COD")}
+                      className="form-radio text-pink-600"
+                    />
+                    <span>Cash on Delivery</span>
+                  </label>
                 </div>
               </div>
 
@@ -401,24 +451,31 @@ function ShoppingCheckout() {
 
               <div className="text-center">
                 <Button
-                  onClick={handleInitiateRazorpayPayment}
+                  onClick={handleInitiatePayment}
                   disabled={isPaymentStart || !currentSelectedAddress}
                   className="w-full md:w-2/3 py-3 md:py-4 text-white bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl hover:shadow-lg transition-all shadow-md disabled:opacity-70 font-medium text-base md:text-lg"
                 >
-                  {isPaymentStart ? (
+                  {paymentMethod === "Razorpay" && isPaymentStart ? (
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white mr-2 md:mr-3"></div>
                       Processing Payment...
                     </div>
-                  ) : (
+                  ) : paymentMethod === "Razorpay" ? (
                     <div className="flex items-center justify-center">
                       Pay Now ₹{totalCartAmount}
+                      <ArrowRight size={16} className="ml-2 flex-shrink-0" />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      Place COD Order of ₹{totalCartAmount}
                       <ArrowRight size={16} className="ml-2 flex-shrink-0" />
                     </div>
                   )}
                 </Button>
                 <p className="text-xs text-pink-400 mt-2 md:mt-3">
-                  Safe &amp; Secure Payment via Razorpay
+                  {paymentMethod === "Razorpay"
+                    ? "Safe & Secure Payment via Razorpay"
+                    : "You will pay on delivery"}
                 </p>
               </div>
             </div>

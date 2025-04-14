@@ -2,7 +2,6 @@ const razorpay = require("../../helpers/razorpay");
 const Order = require("../../models/Order");
 const Cart = require("../../models/Cart");
 const Product = require("../../models/Product");
-// const FRONTEND_URL = "https://swweet-surprises.vercel.app";
 
 const createOrder = async (req, res) => {
   try {
@@ -16,13 +15,56 @@ const createOrder = async (req, res) => {
       totalAmount,
       orderDate,
       orderUpdateDate,
-      // Since we now use Razorpay, these fields might be set after payment confirmation
       paymentId,
       razorpaySignature,
       cartId,
     } = req.body;
 
-    // Razorpay requires the amount in paisa.
+    // If payment method is COD, simply create the order without Razorpay integration
+    if (paymentMethod === "COD") {
+      // You can choose your own order status for COD. Here, we use "Pending" for orders awaiting delivery/payment collection.
+      const codOrder = new Order({
+        userId,
+        cartId,
+        cartItems,
+        addressInfo,
+        orderStatus: "Pending", // or use "Confirmed" if you want to confirm it immediately
+        paymentMethod,
+        paymentStatus: "Pending", // COD orders remain pending until delivered/received payment
+        totalAmount,
+        orderDate,
+        orderUpdateDate,
+        paymentId: "", // Not applicable for COD
+        razorpaySignature: "",
+        razorpayOrderId: "", // Not applicable for COD
+      });
+      await codOrder.save();
+
+      // Optionally update product stock (if you want to reserve inventory immediately)
+      for (let item of cartItems) {
+        let product = await Product.findById(item.productId);
+        if (!product) {
+          return res.status(404).json({
+            success: false,
+            message: `Product not found for ${item.title || item.productId}`,
+          });
+        }
+        product.totalStock -= item.quantity;
+        await product.save();
+      }
+
+      // Clear the cart if needed.
+      await Cart.findByIdAndDelete(cartId);
+
+      return res.status(201).json({
+        success: true,
+        message: "COD order created successfully",
+        orderId: codOrder._id,
+        data: codOrder,
+      });
+    }
+
+    // If payment method is Razorpay, then create a Razorpay order.
     const options = {
       amount: Math.round(totalAmount * 100), // convert INR to paise
       currency: "INR",
@@ -30,17 +72,15 @@ const createOrder = async (req, res) => {
       payment_capture: 1, // automatic capture on payment success
     };
 
-    // Create order with Razorpay
     razorpay.orders.create(options, async (error, orderInfo) => {
       if (error) {
         console.error("Error while creating razorpay order:", error);
-
         return res.status(500).json({
           success: false,
           message: "Error while creating razorpay order",
         });
       } else {
-        // Save order details in the database. Payment details (paymentId, signature) can be updated later
+        // Save order details in the database. Payment details (paymentId, signature) will be updated after payment confirmation.
         const newlyCreatedOrder = new Order({
           userId,
           cartId,
@@ -52,15 +92,14 @@ const createOrder = async (req, res) => {
           totalAmount,
           orderDate,
           orderUpdateDate,
-          paymentId, // This will be updated once payment is captured
-          razorpaySignature, // This too
-          // Optionally, store the Razorpay order id returned by the API
-          razorpayOrderId: orderInfo.id,
+          paymentId, // To be updated on payment capture
+          razorpaySignature, // To be updated on payment capture
+          razorpayOrderId: orderInfo.id, // Store Razorpay order ID
         });
 
         await newlyCreatedOrder.save();
 
-        // Respond back with the order details from Razorpay (order id, etc.)
+        // Respond with the Razorpay order details required for payment on the frontend.
         res.status(201).json({
           success: true,
           razorpayOrder: orderInfo,
@@ -90,14 +129,14 @@ const capturePayment = async (req, res) => {
       });
     }
 
-    // In a real-world scenario, you should verify the signature here to ensure payment authenticity.
-    // Assuming verification is done on the client or via webhook, we update the order details accordingly.
+    // Verify the Razorpay signature in a production setup
+
     order.paymentStatus = "Paid";
     order.orderStatus = "Confirmed";
     order.paymentId = paymentId;
     order.razorpaySignature = razorpaySignature;
 
-    // Update each product's stock based on the purchased quantity.
+    // Update the stock for each product purchased.
     for (let item of order.cartItems) {
       let product = await Product.findById(item.productId);
 
@@ -112,9 +151,8 @@ const capturePayment = async (req, res) => {
       await product.save();
     }
 
-    // Remove the cart as it has now been processed.
+    // Remove the cart after processing the order.
     await Cart.findByIdAndDelete(order.cartId);
-
     await order.save();
 
     res.status(200).json({
@@ -134,7 +172,6 @@ const capturePayment = async (req, res) => {
 const getAllOrdersByUser = async (req, res) => {
   try {
     const { userId } = req.params;
-
     const orders = await Order.find({ userId });
 
     if (!orders.length) {
@@ -160,7 +197,6 @@ const getAllOrdersByUser = async (req, res) => {
 const getOrderDetails = async (req, res) => {
   try {
     const { id } = req.params;
-
     const order = await Order.findById(id);
 
     if (!order) {
