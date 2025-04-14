@@ -7,8 +7,6 @@ import { useState, useEffect } from "react";
 import { createNewOrder, capturePayment } from "@/store/shop/order-slice";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import dotenv from 'dotenv';
-dotenv.config();
 
 function ShoppingCheckout() {
   const { cartItems } = useSelector((state) => state.shopCart);
@@ -96,7 +94,7 @@ function ShoppingCheckout() {
       // Make sure the script is available on window
       if (typeof window !== "undefined" && window.Razorpay) {
         const options = {
-          key: process.env.RAZORPAY_KEY, // your public Razorpay key
+          key: 'rzp_test_BN58I09Ntf1QYq', // your public Razorpay key
           amount: razorpayOrder.amount, // amount is in paise
           currency: razorpayOrder.currency,
           name: "Swweet Surprises",
