@@ -73,7 +73,7 @@ const shoppingOrderSlice = createSlice({
       .addCase(createNewOrder.fulfilled, (state, action) => {
         state.isLoading = false;
         // When a COD order is created, the backend may not return a razorpayOrder,
-        // so set it explicitly to null if missing.
+        // so set it explicitly to null if missing...
         state.razorpayOrder = action.payload.razorpayOrder || null;
         state.orderId = action.payload.orderId;
         sessionStorage.setItem(
