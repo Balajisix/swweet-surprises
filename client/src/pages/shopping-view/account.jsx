@@ -1,68 +1,75 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import accImg from "../../assets/account.jpg";
+import { User, Package, MapPin } from "lucide-react";
 import Address from "@/components/shopping-view/address";
 import ShoppingOrders from "@/components/shopping-view/orders";
 
-// Assuming userName is passed as a prop or fetched from a global state/context
-function ShoppingAccount({ userName }) {
+function ShoppingAccount({ userName = "Valued Customer" }) {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-r from-pink-200 to-pink-300">
-      {/* Hero Image Section with Soft Glassmorphism */}
-      <div className="relative h-[350px] w-full overflow-hidden mb-8 rounded-xl shadow-lg">
-        <img
-          src={accImg}
-          className="h-full w-full object-cover object-center"
-          alt="Account Hero"
-        />
-        <div className="absolute inset-0 bg-black opacity-40"></div>
-        {/* <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-white text-5xl font-bold text-center tracking-widest drop-shadow-lg">
-            Welcome, {userName}!
-          </h1>
-        </div> */}
+    <div className="flex flex-col min-h-screen bg-gradient-to-r from-pink-100 to-pink-200">
+      {/* Welcome Header - Replaced large banner with a clean welcome section */}
+      <div className="bg-white shadow-md">
+        <div className="container mx-auto py-6 px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="mb-4 md:mb-0">
+              <h1 className="text-3xl font-bold text-pink-600">Welcome, {userName}!</h1>
+              <p className="text-gray-600 mt-1">Manage your sweet surprises account</p>
+            </div>
+            <div className="bg-pink-100 p-3 rounded-full">
+              <User size={36} className="text-pink-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Account Content Section with Soft Glassmorphism */}
-      <div className="container mx-auto grid grid-cols-1 gap-8 py-8 px-4 lg:px-6">
-        <div className="flex flex-col rounded-xl bg-white bg-opacity-70 backdrop-blur-lg shadow-xl border border-gray-200 p-6">
-          {/* Tabs Navigation with Hover Effect */}
-          <Tabs defaultValue="orders">
-            <TabsList className="flex justify-center mb-4 border-b border-gray-300">
-              <TabsTrigger
-                value="orders"
-                className="text-xl font-medium text-gray-700 px-6 py-3 rounded-t-lg focus:outline-none transition-transform hover:scale-105 hover:bg-pink-100 hover:text-pink-600"
+      {/* Account Content Section */}
+      <div className="container mx-auto flex-grow py-6 px-4">
+        <div className="bg-white rounded-xl shadow-lg border border-pink-100 overflow-hidden">
+          {/* Tabs Navigation with Icons */}
+          <Tabs defaultValue="orders" className="w-full">
+            <TabsList className="w-full flex border-b border-gray-200 bg-pink-50">
+              <TabsTrigger 
+                value="orders" 
+                className="flex-1 flex items-center justify-center gap-2 py-4 text-base font-medium transition-all hover:bg-pink-100"
               >
-                Orders
+                <Package size={18} />
+                <span className="hidden sm:inline">My Orders</span>
               </TabsTrigger>
-              <TabsTrigger
-                value="address"
-                className="text-xl font-medium text-gray-700 px-6 py-3 rounded-t-lg focus:outline-none transition-transform hover:scale-105 hover:bg-pink-100 hover:text-pink-600"
+              <TabsTrigger 
+                value="address" 
+                className="flex-1 flex items-center justify-center gap-2 py-4 text-base font-medium transition-all hover:bg-pink-100"
               >
-                Address
+                <MapPin size={18} />
+                <span className="hidden sm:inline">Addresses</span>
               </TabsTrigger>
             </TabsList>
 
-            {/* Tab Content with Smooth Transitions */}
-            <TabsContent value="orders" className="p-6">
-              <ShoppingOrders />
-            </TabsContent>
-            <TabsContent value="address" className="p-6">
-              <Address />
-            </TabsContent>
+            {/* Tab Content */}
+            <div className="p-4 md:p-6">
+              <TabsContent value="orders" className="mt-2">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Order History</h2>
+                <ShoppingOrders />
+              </TabsContent>
+              <TabsContent value="address" className="mt-2">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Saved Addresses</h2>
+                <Address />
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
       </div>
 
-      {/* Footer Section with Light Pink Theme */}
-      <footer className="bg-pink-300 py-6 mt-8">
-        <div className="container mx-auto text-center">
-          <div className="text-gray-700 text-[25px] font-medium mb-4">
-            Stay connected with us...
-          </div>
-          <div className="flex justify-center space-x-4 text-white">
-            <a href="" className="hover:text-pink-600">Facebook</a>
-            <a href="#" className="hover:text-pink-600">Twitter</a>
-            <a href="https://www.instagram.com/swweet_surprises/" target="blank" className="hover:text-pink-600">Instagram</a>
+      {/* Footer Section - Simplified and more responsive */}
+      <footer className="bg-pink-600 py-4 text-white">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
+            <p className="text-lg font-medium mb-3 sm:mb-0">
+              Stay connected with us
+            </p>
+            <div className="flex space-x-6">
+              <a href="#" className="hover:text-pink-200 transition-colors">Facebook</a>
+              <a href="#" className="hover:text-pink-200 transition-colors">Twitter</a>
+              <a href="https://www.instagram.com/swweet_surprises/" target="blank" className="hover:text-pink-200 transition-colors">Instagram</a>
+            </div>
           </div>
         </div>
       </footer>
