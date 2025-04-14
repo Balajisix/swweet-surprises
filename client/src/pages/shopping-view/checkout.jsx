@@ -5,13 +5,14 @@ import UserCartItemsContent from "@/components/shopping-view/cart-items-content"
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { createNewOrder, capturePayment } from "@/store/shop/order-slice";
-import { Navigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 function ShoppingCheckout() {
   const { cartItems } = useSelector((state) => state.shopCart);
   const { user } = useSelector((state) => state.auth);
-  const { razorpayOrder, orderId } = useSelector((state) => state.shopOrder);
+  const { razorpayOrder, orderId, redirect_urls } = useSelector(
+    (state) => state.shopOrder
+  );
   const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
   const [isPaymentStart, setIsPaymentStart] = useState(false);
   const dispatch = useDispatch();
@@ -31,7 +32,7 @@ function ShoppingCheckout() {
         )
       : 0;
 
-  // Create a new order on the backend and prepare for Razorpay payment
+  // Initiate a new Razorpay order
   const handleInitiateRazorpayPayment = () => {
     if (!cartItems || cartItems.items.length === 0) {
       toast({
@@ -88,20 +89,26 @@ function ShoppingCheckout() {
     });
   };
 
-  // Whenever we get a new razorpayOrder from the store, open the Razorpay checkout
+  // When razorpayOrder becomes available, open Razorpay checkout with redirection enabled.
   useEffect(() => {
     if (razorpayOrder) {
-      // Make sure the script is available on window
       if (typeof window !== "undefined" && window.Razorpay) {
+        // Use the return URL provided by the backend (you could also use cancel_url as needed)
+        const callbackUrl = redirect_urls?.return_url;
         const options = {
-          key: 'rzp_test_BN58I09Ntf1QYq', // your public Razorpay key
-          amount: razorpayOrder.amount, // amount is in paise
+          key: 'rzp_test_BN58I09Ntf1QYq', // ensure this is set in your env variables
+          amount: razorpayOrder.amount, // amount in paise
           currency: razorpayOrder.currency,
           name: "Swweet Surprises",
           description: "Test Transaction",
           order_id: razorpayOrder.id, // Razorpay order ID
+          // Enable redirection after payment (both for success and failure)
+          redirect: true,
+          callback_url: callbackUrl,
+          // Optional handler if you prefer to handle without redirect
           handler: function (response) {
-            // response contains razorpay_payment_id, razorpay_order_id, and razorpay_signature
+            // In case you decide not to redirect automatically,
+            // you can capture payment manually here.
             dispatch(
               capturePayment({
                 paymentId: response.razorpay_payment_id,
@@ -139,10 +146,10 @@ function ShoppingCheckout() {
         const rzp = new window.Razorpay(options);
         rzp.open();
       } else {
-        console.error("Razorpay script not loaded. Please check index.html.");
+        console.error("Razorpay script not loaded. Check index.html");
       }
     }
-  }, [razorpayOrder, dispatch, orderId, user, currentSelectedAddress, toast]);
+  }, [razorpayOrder, redirect_urls, dispatch, orderId, user, currentSelectedAddress, toast]);
 
   return (
     <div className="flex flex-col">
