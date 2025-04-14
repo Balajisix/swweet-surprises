@@ -154,7 +154,7 @@ function ProductDetailsPage() {
   
   function handleBuyNow() {
     handleAddToCart();
-    navigate('/shop/cart');
+    navigate('/shop/checkout');
   }
   
   function handleAddReview() {

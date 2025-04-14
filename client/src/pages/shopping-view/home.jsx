@@ -130,13 +130,13 @@ function ShoppingHome() {
                 >
                   Shop Now
                 </Button>
-                <Button 
+                {/* <Button 
                   variant="outline" 
                   className="border-pink-600 text-pink-600 hover:bg-pink-100"
                   onClick={() => navigate('/custom-order')}
                 >
                   Custom Order
-                </Button>
+                </Button> */}
               </div>
             </div>
             {/* Banner image */}
