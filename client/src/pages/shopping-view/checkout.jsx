@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createNewOrder, capturePayment } from "@/store/shop/order-slice";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ function ShoppingCheckout() {
   // New state to flag when the order is completed along with order details (if needed)
   const [orderCompleted, setOrderCompleted] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Calculate the total cart amount
@@ -232,7 +233,7 @@ function ShoppingCheckout() {
           </p>
           {/* You can navigate to order details, home, or elsewhere */}
           <Button
-            onClick={() => window.location.reload()}
+            onClick={() => navigate('/shop/home')}
             className="bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl px-4 py-2"
           >
             Continue Shopping
