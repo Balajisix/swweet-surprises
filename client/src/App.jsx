@@ -27,7 +27,7 @@ import SearchProducts from "./pages/shopping-view/search";
 import ProductDetailsPage from "./components/shopping-view/product-details";
 
 function App() {
-  const { user, isAuthenticated, isLoading } = useSelector(
+  const { user, isAuthenticated, isLoading, authChecked } = useSelector(
     (state) => state.auth
   );
   const dispatch = useDispatch();
