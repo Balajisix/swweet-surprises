@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import Address from "@/components/shopping-view/address";
 import UserCartItemsContent from "@/components/shopping-view/cart-items-content";
-import { Check, ShoppingBag, MapPin, CreditCard } from "lucide-react";
+import { Check, ShoppingBag, MapPin, CreditCard, Gift, ArrowRight, ArrowLeft } from "lucide-react";
 
 function ShoppingCheckout() {
   const { cartItems } = useSelector((state) => state.shopCart);
@@ -98,8 +98,8 @@ function ShoppingCheckout() {
           key: 'rzp_test_BN58I09Ntf1QYq', // your public Razorpay key
           amount: razorpayOrder.amount, // amount is in paise
           currency: razorpayOrder.currency,
-          name: "Swweet Surprises",
-          description: "Test Transaction",
+          name: "Sweet Surprises",
+          description: "Delightful treats delivered to your door",
           order_id: razorpayOrder.id, // Razorpay order ID
           handler: function (response) {
             // response contains razorpay_payment_id, razorpay_order_id, and razorpay_signature
@@ -114,6 +114,7 @@ function ShoppingCheckout() {
               if (res?.payload?.success) {
                 toast({
                   title: "Payment successful. Order confirmed!",
+                  description: "Your sweet surprises are on the way!",
                   variant: "default",
                 });
               } else {
@@ -133,7 +134,7 @@ function ShoppingCheckout() {
             address: currentSelectedAddress?.address,
           },
           theme: {
-            color: "#F37254",
+            color: "#FF4D8D",
           },
         };
 
@@ -175,75 +176,91 @@ function ShoppingCheckout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
-      {/* Header Section - Smaller and more elegant */}
-      <div className="bg-pink-500 text-white p-4 md:p-6 rounded-b-lg shadow-md">
-        <h1 className="text-2xl md:text-3xl font-bold text-center">Checkout</h1>
-        <p className="text-center text-pink-100 mt-1">Complete your order</p>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      {/* Decorative elements */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-pink-100 rounded-full -mr-32 -mt-32 opacity-50"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 rounded-full -ml-48 -mb-48 opacity-50"></div>
+      
+      {/* Header Section with animated gradient border */}
+      <div className="relative bg-white text-pink-600 p-6 md:p-8 rounded-b-3xl shadow-lg border-t-8 border-pink-400">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-pink-300 via-purple-400 to-pink-300"></div>
+        <div className="flex items-center justify-center mb-2">
+          <Gift className="text-pink-500 mr-2" size={32} />
+          <h1 className="text-3xl md:text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600">
+            Sweet Surprises
+          </h1>
+        </div>
+        <p className="text-center text-pink-400 font-medium">Complete your order and sweeten someone's day</p>
       </div>
 
       {/* Checkout Progress */}
-      <div className="max-w-4xl mx-auto mt-6 px-4">
-        <div className="flex justify-between mb-8">
-          <div className="flex flex-col items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${checkoutStep >= 1 ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+      <div className="max-w-4xl mx-auto mt-8 px-4">
+        <div className="flex justify-between mb-8 relative">
+          {/* Progress line underneath */}
+          <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 z-0"></div>
+          <div className={`absolute top-5 left-0 h-1 bg-gradient-to-r from-pink-400 to-purple-500 z-0 transition-all duration-500 ease-in-out`} style={{ width: checkoutStep === 1 ? '0%' : checkoutStep === 2 ? '50%' : '100%' }}></div>
+          
+          {/* Step indicators */}
+          <div className="flex flex-col items-center z-10">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${checkoutStep >= 1 ? 'bg-gradient-to-r from-pink-500 to-pink-400 text-white shadow-lg shadow-pink-200' : 'bg-gray-200 text-gray-500'}`}>
               <ShoppingBag size={20} />
             </div>
-            <span className="text-xs mt-2 text-center">Cart</span>
+            <span className={`text-xs mt-2 text-center font-medium ${checkoutStep >= 1 ? 'text-pink-600' : 'text-gray-500'}`}>Cart</span>
           </div>
           
-          <div className="flex-1 flex items-center justify-center">
-            <div className={`h-1 w-full ${checkoutStep >= 2 ? 'bg-pink-500' : 'bg-gray-200'}`}></div>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${checkoutStep >= 2 ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+          <div className="flex flex-col items-center z-10">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${checkoutStep >= 2 ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg shadow-pink-200' : 'bg-gray-200 text-gray-500'}`}>
               <MapPin size={20} />
             </div>
-            <span className="text-xs mt-2 text-center">Address</span>
+            <span className={`text-xs mt-2 text-center font-medium ${checkoutStep >= 2 ? 'text-pink-600' : 'text-gray-500'}`}>Address</span>
           </div>
           
-          <div className="flex-1 flex items-center justify-center">
-            <div className={`h-1 w-full ${checkoutStep >= 3 ? 'bg-pink-500' : 'bg-gray-200'}`}></div>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${checkoutStep >= 3 ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+          <div className="flex flex-col items-center z-10">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${checkoutStep >= 3 ? 'bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-lg shadow-purple-200' : 'bg-gray-200 text-gray-500'}`}>
               <CreditCard size={20} />
             </div>
-            <span className="text-xs mt-2 text-center">Payment</span>
+            <span className={`text-xs mt-2 text-center font-medium ${checkoutStep >= 3 ? 'text-purple-600' : 'text-gray-500'}`}>Payment</span>
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8">
+        {/* Content Section with fancy styling */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-pink-100 relative overflow-hidden">
+          {/* Decorative corner element */}
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-100 to-transparent rounded-bl-full opacity-80"></div>
+          
           {/* Step 1: Cart Review */}
           {checkoutStep === 1 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-pink-700 mb-4">Review Your Cart</h2>
+              <h2 className="text-2xl font-semibold text-pink-600 mb-4 flex items-center">
+                <ShoppingBag size={24} className="mr-2 text-pink-500" />
+                Review Your Sweet Selections
+              </h2>
               
               {cartItems && cartItems.items && cartItems.items.length > 0 ? (
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-pink-50">
                   {cartItems.items.map((item, index) => (
                     <UserCartItemsContent
                       key={index}
                       cartItem={item}
-                      className="border border-pink-100 rounded-lg p-3 hover:shadow-md transition-all"
+                      className="border border-pink-100 rounded-xl p-4 hover:shadow-md transition-all hover:border-pink-200 bg-gradient-to-r from-white to-pink-50"
                     />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <ShoppingBag size={48} className="mx-auto text-pink-300 mb-3" />
-                  <p className="text-pink-500 font-medium">Your cart is empty! Add items to proceed.</p>
+                <div className="text-center py-12 bg-pink-50 rounded-xl">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-pink-100 flex items-center justify-center">
+                    <ShoppingBag size={40} className="text-pink-400" />
+                  </div>
+                  <p className="text-pink-600 font-medium mb-2">Your cart is empty!</p>
+                  <p className="text-pink-400 text-sm">Add sweet surprises to proceed with checkout</p>
                 </div>
               )}
               
               {cartItems && cartItems.items && cartItems.items.length > 0 && (
-                <div className="bg-pink-50 p-4 rounded-md mt-4">
+                <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-5 rounded-xl mt-5 shadow-sm border border-pink-100">
                   <div className="flex justify-between text-lg font-medium text-pink-800">
                     <span>Total</span>
-                    <span>₹{totalCartAmount}</span>
+                    <span className="font-bold">₹{totalCartAmount}</span>
                   </div>
                 </div>
               )}
@@ -253,7 +270,10 @@ function ShoppingCheckout() {
           {/* Step 2: Address Selection */}
           {checkoutStep === 2 && (
             <div>
-              <h2 className="text-xl font-semibold text-pink-700 mb-4">Select Delivery Address</h2>
+              <h2 className="text-2xl font-semibold text-pink-600 mb-4 flex items-center">
+                <MapPin size={24} className="mr-2 text-pink-500" />
+                Where to Deliver Your Sweets?
+              </h2>
               <Address
                 selectedId={currentSelectedAddress}
                 setCurrentSelectedAddress={setCurrentSelectedAddress}
@@ -264,37 +284,57 @@ function ShoppingCheckout() {
           {/* Step 3: Payment */}
           {checkoutStep === 3 && (
             <div>
-              <h2 className="text-xl font-semibold text-pink-700 mb-4">Payment</h2>
+              <h2 className="text-2xl font-semibold text-pink-600 mb-6 flex items-center">
+                <CreditCard size={24} className="mr-2 text-pink-500" />
+                Complete Your Sweet Order
+              </h2>
               
-              <div className="bg-pink-50 p-4 rounded-md mb-6">
-                <h3 className="font-medium text-pink-700 mb-2">Order Summary</h3>
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-600">Items ({cartItems?.items?.length || 0})</span>
+              <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-5 rounded-xl mb-6 shadow-sm border border-pink-100">
+                <h3 className="font-medium text-pink-700 mb-3 flex items-center">
+                  <Gift size={18} className="mr-2" />
+                  Order Summary
+                </h3>
+                <div className="flex justify-between mb-2 text-gray-700">
+                  <span>Items ({cartItems?.items?.length || 0})</span>
                   <span>₹{totalCartAmount}</span>
                 </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-600">Shipping</span>
-                  <span>Free</span>
+                <div className="flex justify-between mb-2 text-gray-700">
+                  <span>Shipping</span>
+                  <span className="text-green-600 font-medium">Free</span>
                 </div>
-                <div className="border-t border-pink-200 my-2"></div>
-                <div className="flex justify-between font-bold text-pink-800">
+                <div className="border-t border-pink-200 my-3"></div>
+                <div className="flex justify-between font-bold text-lg text-gradient bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                   <span>Total</span>
                   <span>₹{totalCartAmount}</span>
                 </div>
               </div>
 
-              <div className="bg-pink-50 p-4 rounded-md mb-6">
-                <h3 className="font-medium text-pink-700 mb-2">Delivery Address</h3>
+              <div className="bg-gradient-to-r from-pink-50 to-pink-100 p-5 rounded-xl mb-6 shadow-sm border border-pink-100">
+                <h3 className="font-medium text-pink-700 mb-3 flex items-center">
+                  <MapPin size={18} className="mr-2" />
+                  Delivery Address
+                </h3>
                 {currentSelectedAddress ? (
-                  <div className="text-gray-700">
-                    <p className="font-medium">{user?.name}</p>
-                    <p>{currentSelectedAddress.address}</p>
+                  <div className="text-gray-700 bg-white p-4 rounded-lg border border-pink-100">
+                    <p className="font-medium text-pink-600">{user?.name}</p>
+                    <p className="mt-1">{currentSelectedAddress.address}</p>
                     <p>{currentSelectedAddress.city} - {currentSelectedAddress.pincode}</p>
-                    <p>Phone: {currentSelectedAddress.phone}</p>
-                    {currentSelectedAddress.notes && <p>Notes: {currentSelectedAddress.notes}</p>}
+                    <p className="mt-1 flex items-center">
+                      <span className="inline-block w-4 h-4 bg-pink-100 rounded-full text-pink-500 flex items-center justify-center mr-2 text-xs">
+                        <Check size={12} />
+                      </span>
+                      {currentSelectedAddress.phone}
+                    </p>
+                    {currentSelectedAddress.notes && (
+                      <p className="mt-2 text-sm bg-pink-50 p-2 rounded border border-pink-100">
+                        Note: {currentSelectedAddress.notes}
+                      </p>
+                    )}
                   </div>
                 ) : (
-                  <p className="text-pink-500">Please go back and select an address</p>
+                  <div className="text-center py-4 bg-white rounded-lg">
+                    <p className="text-pink-500">Please go back and select an address</p>
+                  </div>
                 )}
               </div>
 
@@ -302,26 +342,34 @@ function ShoppingCheckout() {
                 <Button
                   onClick={handleInitiateRazorpayPayment}
                   disabled={isPaymentStart || !currentSelectedAddress}
-                  className="w-full md:w-2/3 py-3 text-white bg-pink-500 rounded-lg hover:bg-pink-600 transition-all shadow-md"
+                  className="w-full md:w-2/3 py-4 text-white bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl hover:shadow-lg transition-all shadow-md disabled:opacity-70 font-medium text-lg"
                 >
                   {isPaymentStart ? (
-                    <>Processing Razorpay Payment...</>
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                      Processing Payment...
+                    </div>
                   ) : (
-                    <>Pay Now with Razorpay</>
+                    <div className="flex items-center justify-center">
+                      Pay Now ₹{totalCartAmount}
+                      <ArrowRight size={18} className="ml-2" />
+                    </div>
                   )}
                 </Button>
+                <p className="text-xs text-pink-400 mt-3">Safe & Secure Payment via Razorpay</p>
               </div>
             </div>
           )}
 
           {/* Navigation buttons */}
-          <div className="flex justify-between mt-6 pt-4 border-t border-gray-100">
+          <div className="flex justify-between mt-8 pt-4 border-t border-gray-100">
             {checkoutStep > 1 ? (
               <Button 
                 onClick={goToPreviousStep}
                 variant="outline" 
-                className="border-pink-300 text-pink-500 hover:bg-pink-50"
+                className="border-pink-300 text-pink-500 hover:bg-pink-50 rounded-xl px-6 flex items-center"
               >
+                <ArrowLeft size={16} className="mr-2" />
                 Back
               </Button>
             ) : (
@@ -331,12 +379,18 @@ function ShoppingCheckout() {
             {checkoutStep < 3 && (
               <Button 
                 onClick={goToNextStep}
-                className="bg-pink-500 hover:bg-pink-600 text-white"
+                className="bg-gradient-to-r from-pink-500 to-purple-600 hover:shadow-md text-white rounded-xl px-6 flex items-center"
               >
                 Continue
+                <ArrowRight size={16} className="ml-2" />
               </Button>
             )}
           </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="text-center text-pink-400 text-sm mb-8">
+          Sweet Surprises • Spreading joy, one sweet at a time
         </div>
       </div>
     </div>
