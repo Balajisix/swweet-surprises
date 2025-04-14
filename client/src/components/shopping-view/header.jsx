@@ -65,7 +65,7 @@ function MenuItems() {
 }
 
 function HeaderRightContent() {
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.shopCart);
   const [openCartSheet, setOpenCartSheet] = useState(false);
   const navigate = useNavigate();
@@ -76,8 +76,10 @@ function HeaderRightContent() {
   }
 
   useEffect(() => {
-    dispatch(fetchCartItems(user?.id));
-  }, [dispatch]);
+    if(isAuthenticated){
+      dispatch(fetchCartItems(user?.id));
+    }
+  }, [dispatch, isAuthenticated, user?.id]);
 
   return (
     <div className="flex lg:items-center lg:flex-row flex-col gap-4">
@@ -104,36 +106,45 @@ function HeaderRightContent() {
         />
       </Sheet>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Avatar className="bg-pink-200 cursor-pointer">
-            <AvatarFallback className="bg-pink-500 text-white font-extrabold">
-              {user?.userName[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" className="w-56 bg-pink-50 border-pink-300">
-          <DropdownMenuLabel className="text-pink-700">
-            Logged in as {user?.userName}
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-pink-300" />
-          <DropdownMenuItem
-            onClick={() => navigate("/shop/account")}
-            className="text-pink-700 hover:text-pink-500"
-          >
-            <UserCog className="mr-2 h-4 w-4 text-pink-700" />
-            Account
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-pink-300" />
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className="text-pink-700 hover:text-pink-500"
-          >
-            <LogOut className="mr-2 h-4 w-4 text-pink-700" />
-            Logout
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {isAuthenticated ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="bg-pink-200 cursor-pointer">
+              <AvatarFallback className="bg-pink-500 text-white font-extrabold">
+                {user?.userName?.[0]?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="right" className="w-56 bg-pink-50 border-pink-300">
+            <DropdownMenuLabel className="text-pink-700">
+              Logged in as {user?.userName}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-pink-300" />
+            <DropdownMenuItem
+              onClick={() => navigate("/shop/account")}
+              className="text-pink-700 hover:text-pink-500"
+            >
+              <UserCog className="mr-2 h-4 w-4 text-pink-700" />
+              Account
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-pink-300" />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-pink-700 hover:text-pink-500"
+            >
+              <LogOut className="mr-2 h-4 w-4 text-pink-700" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button
+          onClick={() => navigate("/auth/login")}
+          className="bg-pink-600 hover:bg-pink-700 text-white"
+        >
+          Login
+        </Button>
+      )}
     </div>
   );
 }
