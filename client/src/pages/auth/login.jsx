@@ -4,7 +4,7 @@ import { loginFormControls } from "@/config";
 import { loginUser } from "@/store/auth-slice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // ✅ added useNavigate & useLocation
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const initialState = {
   email: "",
@@ -15,27 +15,32 @@ function AuthLogin() {
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
   const { toast } = useToast();
-  const navigate = useNavigate(); // ✅ added
-  const location = useLocation(); // ✅ added
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // ✅ get the previous location (or fallback to /shop/home)
-  const from = location.state?.from?.pathname || "/shop/home";
+  const from = location.state?.from?.pathname;
 
   function onSubmit(event) {
     event.preventDefault();
-  
+
     dispatch(loginUser(formData)).then((data) => {
       if (data?.payload?.success) {
         toast({
           title: data?.payload?.message,
         });
-  
-        const userType = data?.payload?.user?.role; // or user?.role, depending on your backend
-  
+
+        const userType = data?.payload?.user?.role;
+
+        // Role-based redirect logic
         if (userType === "admin") {
           navigate("/admin/dashboard", { replace: true });
         } else {
-          navigate(from, { replace: true });
+          // if trying to access admin page but is not admin, redirect to shop home
+          if (from && from.includes("/admin")) {
+            navigate("/shop/home", { replace: true });
+          } else {
+            navigate(from || "/shop/home", { replace: true });
+          }
         }
       } else {
         toast({
