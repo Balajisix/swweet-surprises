@@ -31,18 +31,18 @@ function ShoppingCheckout() {
         )
       : 0;
 
-  // Function to initiate Razorpay payment flow by creating a new order
+  // Create a new order on the backend and prepare for Razorpay payment
   const handleInitiateRazorpayPayment = () => {
     if (!cartItems || cartItems.items.length === 0) {
       toast({
-        title: "Your cart is empty. Please add items to proceed",
+        title: "Your cart is empty. Please add items to proceed.",
         variant: "destructive",
       });
       return;
     }
     if (currentSelectedAddress === null) {
       toast({
-        title: "Please select one address to proceed.",
+        title: "Please select an address to proceed.",
         variant: "destructive",
       });
       return;
@@ -70,14 +70,12 @@ function ShoppingCheckout() {
         notes: currentSelectedAddress?.notes,
       },
       orderStatus: "Pending",
-      // update paymentMethod to Razorpay
       paymentMethod: "Razorpay",
       paymentStatus: "Pending",
       totalAmount: totalCartAmount,
       orderDate: new Date(),
       orderUpdateDate: new Date(),
       paymentId: "",
-      // Razorpay uses a signature after payment capture – handled later
       razorpaySignature: "",
     };
 
@@ -90,55 +88,59 @@ function ShoppingCheckout() {
     });
   };
 
-  // When razorpayOrder is available, launch the Razorpay checkout modal
+  // Whenever we get a new razorpayOrder from the store, open the Razorpay checkout
   useEffect(() => {
     if (razorpayOrder) {
-      const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY, // use your Razorpay key here or store in env variable
-        amount: razorpayOrder.amount, // amount is in paise
-        currency: razorpayOrder.currency,
-        name: "Swweet Surprises",
-        description: "Test Transaction",
-        order_id: razorpayOrder.id, // Razorpay order ID
-        handler: function (response) {
-          // response contains razorpay_payment_id, razorpay_order_id and razorpay_signature
-          // Dispatch capturePayment to update the order in the backend
-          dispatch(
-            capturePayment({
-              paymentId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id,
-              razorpaySignature: response.razorpay_signature,
-              orderId: orderId,
-            })
-          ).then((res) => {
-            if (res?.payload?.success) {
-              toast({
-                title: "Payment successful. Order confirmed!",
-                variant: "default",
-              });
-            } else {
-              toast({
-                title: "Payment verification failed.",
-                variant: "destructive",
-              });
-            }
-          });
-        },
-        prefill: {
-          name: user?.name,
-          email: user?.email,
-          contact: currentSelectedAddress?.phone,
-        },
-        notes: {
-          address: currentSelectedAddress?.address,
-        },
-        theme: {
-          color: "#F37254",
-        },
-      };
+      // Make sure the script is available on window
+      if (typeof window !== "undefined" && window.Razorpay) {
+        const options = {
+          key: process.env.RAZORPAY_KEY, // your public Razorpay key
+          amount: razorpayOrder.amount, // amount is in paise
+          currency: razorpayOrder.currency,
+          name: "Swweet Surprises",
+          description: "Test Transaction",
+          order_id: razorpayOrder.id, // Razorpay order ID
+          handler: function (response) {
+            // response contains razorpay_payment_id, razorpay_order_id, and razorpay_signature
+            dispatch(
+              capturePayment({
+                paymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
+                orderId: orderId,
+              })
+            ).then((res) => {
+              if (res?.payload?.success) {
+                toast({
+                  title: "Payment successful. Order confirmed!",
+                  variant: "default",
+                });
+              } else {
+                toast({
+                  title: "Payment verification failed.",
+                  variant: "destructive",
+                });
+              }
+            });
+          },
+          prefill: {
+            name: user?.name,
+            email: user?.email,
+            contact: currentSelectedAddress?.phone,
+          },
+          notes: {
+            address: currentSelectedAddress?.address,
+          },
+          theme: {
+            color: "#F37254",
+          },
+        };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } else {
+        console.error("Razorpay script not loaded. Please check index.html.");
+      }
     }
   }, [razorpayOrder, dispatch, orderId, user, currentSelectedAddress, toast]);
 
