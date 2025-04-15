@@ -187,7 +187,7 @@ function ShoppingAccount() {
         </div>
       </div>
 
-      {/* Enhanced Footer */}
+      {/* Footer */}
       <footer className="bg-gradient-to-r from-pink-600 to-purple-600 text-white py-6">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between mb-6">
