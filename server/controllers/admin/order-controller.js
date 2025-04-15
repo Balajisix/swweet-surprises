@@ -1,5 +1,20 @@
 const Order = require("../../models/Order");
 
+const getRecentorders = async(req, res) => {
+  try {
+    const orders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("cartItems.productId", "title price image")
+      .populate("userId", "name email");
+
+    res.status(200).json({ success: true, data: orders });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, message: "Error fetching recent orders" });
+  }
+}
+
 const getAllOrdersOfAllUsers = async (req, res) => {
   try {
     // Populate product details for each order
@@ -89,4 +104,5 @@ module.exports = {
   getAllOrdersOfAllUsers,
   getOrderDetailsForAdmin,
   updateOrderStatus,
+  getRecentorders
 };

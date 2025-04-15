@@ -1,357 +1,473 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
-import { Activity, ArrowDown, ArrowUp, Calendar, ChevronDown, DollarSign, Filter, MoreHorizontal, RefreshCw, Search, ShoppingBag, Users } from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  Tooltip,
+  XAxis,
+  YAxis,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  Activity,
+  ArrowDown,
+  ArrowUp,
+  DollarSign,
+  ShoppingBag,
+  Users,
+  Calendar,
+  Search,
+  ChevronRight,
+  Clock,
+} from "lucide-react";
+
+// Adjust API URL as needed
+const API_BASE_URL = "https://backend-api-ten-sigma.vercel.app/api/admin";
+const API_ORDERS_URL = "https://backend-api-ten-sigma.vercel.app/api/admin/orders/recent";
 
 function AdminDashboard() {
-  const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("daily");
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTableExpanded, setIsTableExpanded] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("all");
 
-  const [dashboardStats, setDashboardStats] = useState({
-    totalSales: 24950,
-    totalOrders: 156,
-    totalCustomers: 89,
-    conversionRate: 3.2,
-    salesGrowth: 12.4,
-    ordersGrowth: 8.7,
-    customersGrowth: 5.3,
-    conversionGrowth: -1.2
+  // Data from backend
+  const [dashboardData, setDashboardData] = useState({
+    totalSales: 0,
+    totalOrders: 0,
+    totalUsers: 0,
+    conversionRate: 0, // fallback
+    salesGrowth: 0,
+    ordersGrowth: 0,
+    usersGrowth: 0,
+    conversionGrowth: 0,
+    graphData: [], // The daily or overall data, each item: { _id: 'YYYY-MM-DD', totalSales: number }
+    productCategoryData: [], // e.g. [{ category: "Electronics", totalSales: 5000 }, ...]
   });
 
-  // Sample data for the charts
-  const salesData = [
-    { name: 'Jan', sales: 4000, profit: 2400, loss: 1600 },
-    { name: 'Feb', sales: 3000, profit: 1600, loss: 1400 },
-    { name: 'Mar', sales: 5000, profit: 2800, loss: 2200 },
-    { name: 'Apr', sales: 2780, profit: 1890, loss: 890 },
-    { name: 'May', sales: 1890, profit: 1090, loss: 800 },
-    { name: 'Jun', sales: 2390, profit: 1590, loss: 800 },
-    { name: 'Jul', sales: 3490, profit: 2090, loss: 1400 }
-  ];
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  const dailyData = [
-    { name: 'Mon', sales: 890 },
-    { name: 'Tue', sales: 1200 },
-    { name: 'Wed', sales: 1450 },
-    { name: 'Thu', sales: 970 },
-    { name: 'Fri', sales: 1650 },
-    { name: 'Sat', sales: 1790 },
-    { name: 'Sun', sales: 1100 }
-  ];
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/dashboard-stats`);
+        const data = await res.json();
+        if (data.success) {
+          setDashboardData({
+            totalSales: data.totalSales || 0,
+            totalOrders: data.totalOrders || 0,
+            totalUsers: data.totalUsers || 0,
+            conversionRate: data.conversionRate || 0,
+            salesGrowth: data.salesGrowth || 0,
+            ordersGrowth: data.ordersGrowth || 0,
+            usersGrowth: data.usersGrowth || 0,
+            conversionGrowth: data.conversionGrowth || 0,
+            graphData: data.graphData || [],
+            productCategoryData: data.productCategoryData || [],
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching admin dashboard data:", err);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
-  const weeklyData = [
-    { name: 'W1', sales: 4200 },
-    { name: 'W2', sales: 3800 },
-    { name: 'W3', sales: 5100 },
-    { name: 'W4', sales: 4600 }
-  ];
+  const [orders, setOrders] = useState([]);
 
-  // Sample recent orders
-  const recentOrders = [
-    { id: '#ORD-7845', customer: 'John Doe', date: '15 Apr 2025', status: 'Completed', amount: '$129.99' },
-    { id: '#ORD-7844', customer: 'Sarah Smith', date: '14 Apr 2025', status: 'Processing', amount: '$89.99' },
-    { id: '#ORD-7843', customer: 'Michael Brown', date: '14 Apr 2025', status: 'Completed', amount: '$259.50' },
-    { id: '#ORD-7842', customer: 'Emma Wilson', date: '13 Apr 2025', status: 'Shipped', amount: '$149.95' },
-    { id: '#ORD-7841', customer: 'James Taylor', date: '12 Apr 2025', status: 'Pending', amount: '$79.99' }
-  ];
+  useEffect(() => {
+    const fetchRecentOrders = async () => {
+      try {
+        const response = await fetch(API_ORDERS_URL);
+        const data = await response.json();
+        if (data.success) {
+          // Expecting data.data to be an array of recent orders
+          setOrders(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching recent orders:", error);
+      }
+    };
+    fetchRecentOrders();
+  }, []);
 
-  // Product category data for pie chart
-  const categoryData = [
-    { name: 'Electronics', value: 42 },
-    { name: 'Clothing', value: 28 },
-    { name: 'Books', value: 15 },
-    { name: 'Home & Kitchen', value: 10 },
-    { name: 'Other', value: 5 }
-  ];
-  
-  const COLORS = ['#4F46E5', '#EC4899', '#10B981', '#F59E0B', '#6B7280'];
-
-  const refreshData = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+  // Recharts requires an array of objects; each object has
+  // `_id` for X-axis, `totalSales` for Y-axis
+  const getSalesDataForChart = () => {
+    return dashboardData.graphData.map((item) => ({
+      name: item._id,
+      totalSales: item.totalSales,
+    }));
   };
 
-  const getActiveData = () => {
-    switch(activeTab) {
-      case 'daily': return dailyData;
-      case 'weekly': return weeklyData;
-      default: return salesData;
+  // Convert productCategoryData into the format for PieChart
+  // e.g. [{ name: 'Electronics', value: 5000 }, ...]
+  const getCategoryDataForChart = () => {
+    return dashboardData.productCategoryData.map((cat) => ({
+      name: cat.category,
+      value: cat.totalSales,
+    }));
+  };
+
+  // Get status color based on order status
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "processing":
+        return "bg-blue-100 text-blue-800";
+      case "shipped":
+        return "bg-purple-100 text-purple-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
+  // A simple stat card component with animation
   const StatCard = ({ title, value, icon, color, growth }) => (
-    <div className="bg-white rounded-lg shadow p-4 flex flex-col hover:shadow-lg transition-shadow duration-300 relative overflow-hidden">
+    <div className="bg-white rounded-xl shadow p-4 flex flex-col relative overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
       <div className="absolute right-0 top-0 h-full w-1/3 opacity-5 flex items-center justify-center">
         {icon}
       </div>
       <div className="flex items-center justify-between mb-3">
-        <div className={`rounded-full p-3 ${color}`}>
-          {icon}
-        </div>
-        <div className={`flex items-center text-sm font-medium ${growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-          {growth >= 0 ? <ArrowUp size={16} className="mr-1" /> : <ArrowDown size={16} className="mr-1" />}
+        <div className={`rounded-full p-2 sm:p-3 ${color}`}>{icon}</div>
+        <div
+          className={`flex items-center text-xs sm:text-sm font-medium ${
+            growth >= 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {growth >= 0 ? (
+            <ArrowUp size={16} className="mr-1" />
+          ) : (
+            <ArrowDown size={16} className="mr-1" />
+          )}
           {Math.abs(growth)}%
         </div>
       </div>
       <div>
-        <h3 className="text-2xl font-bold mb-1">{value}</h3>
-        <p className="text-sm text-gray-500">{title}</p>
+        <h3 className="text-lg sm:text-2xl font-bold mb-1">{value}</h3>
+        <p className="text-xs sm:text-sm text-gray-500">{title}</p>
       </div>
     </div>
   );
 
-  const getStatusBadge = (status) => {
-    const statusClasses = {
-      'Completed': 'bg-green-100 text-green-800',
-      'Processing': 'bg-blue-100 text-blue-800',
-      'Shipped': 'bg-purple-100 text-purple-800',
-      'Pending': 'bg-yellow-100 text-yellow-800'
-    };
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`}>
-        {status}
-      </span>
-    );
-  };
+  const COLORS = ["#4F46E5", "#EC4899", "#10B981", "#F59E0B", "#6B7280", "#E879F9"];
+
+  // Filter orders based on activeFilter
+  const filteredOrders = orders.filter(order => {
+    if (activeFilter === 'all') return true;
+    return order.orderStatus?.toLowerCase() === activeFilter.toLowerCase();
+  });
 
   return (
-    <div className="p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      {/* Header with actions */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="p-2 sm:p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      {/* Header with date */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600">Welcome back to your admin dashboard</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Admin Dashboard</h1>
+          <p className="text-sm text-gray-600 flex items-center">
+            <Calendar size={14} className="mr-1" />
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              className="pl-9 pr-4 py-2 rounded-lg border border-gray-200 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="mt-2 sm:mt-0 relative">
+          <div className="relative flex items-center bg-white rounded-lg shadow-sm px-3 py-2">
+            <Search size={16} className="text-gray-400 mr-2" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="text-sm border-none outline-none bg-transparent w-full"
             />
-            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          </div>
-          <div className="flex gap-2">
-            <button 
-              className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
-              onClick={() => setShowDropdown(!showDropdown)}
-            >
-              <Filter size={18} />
-              <span>Filter</span>
-              <ChevronDown size={16} />
-            </button>
-            <button 
-              className={`flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 ${isLoading ? 'animate-spin' : ''}`}
-              onClick={refreshData}
-              disabled={isLoading}
-            >
-              <RefreshCw size={18} />
-            </button>
           </div>
         </div>
       </div>
-      
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard 
-          title="Total Sales" 
-          value={`$${dashboardStats.totalSales.toLocaleString()}`} 
-          icon={<DollarSign size={20} className="text-white" />}
-          color="bg-gradient-to-r from-blue-500 to-blue-600"
-          growth={dashboardStats.salesGrowth}
+
+      {/* Stats Cards with hover effects */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-5 sm:mb-6">
+        <StatCard
+          title="Total Sales"
+          value={`₹${dashboardData.totalSales.toLocaleString()}`}
+          icon={<DollarSign size={isMobile ? 16 : 20} className="text-white" />}
+          color="bg-gradient-to-r from-blue-500 to-indigo-600"
+          growth={dashboardData.salesGrowth}
         />
-        <StatCard 
-          title="Total Orders" 
-          value={dashboardStats.totalOrders} 
-          icon={<ShoppingBag size={20} className="text-white" />}
-          color="bg-gradient-to-r from-purple-500 to-purple-600"
-          growth={dashboardStats.ordersGrowth}
+        <StatCard
+          title="Total Orders"
+          value={dashboardData.totalOrders.toLocaleString()}
+          icon={<ShoppingBag size={isMobile ? 16 : 20} className="text-white" />}
+          color="bg-gradient-to-r from-purple-500 to-pink-600"
+          growth={dashboardData.ordersGrowth}
         />
-        <StatCard 
-          title="Customers" 
-          value={dashboardStats.totalCustomers} 
-          icon={<Users size={20} className="text-white" />}
-          color="bg-gradient-to-r from-green-500 to-green-600"
-          growth={dashboardStats.customersGrowth}
+        <StatCard
+          title="Customers"
+          value={dashboardData.totalUsers.toLocaleString()}
+          icon={<Users size={isMobile ? 16 : 20} className="text-white" />}
+          color="bg-gradient-to-r from-green-500 to-emerald-600"
+          growth={dashboardData.usersGrowth}
         />
-        <StatCard 
-          title="Conversion Rate" 
-          value={`${dashboardStats.conversionRate}%`} 
-          icon={<Activity size={20} className="text-white" />}
-          color="bg-gradient-to-r from-amber-500 to-amber-600"
-          growth={dashboardStats.conversionGrowth}
+        <StatCard
+          title="Conversion Rate"
+          value={`${dashboardData.conversionRate}%`}
+          icon={<Activity size={isMobile ? 16 : 20} className="text-white" />}
+          color="bg-gradient-to-r from-amber-500 to-orange-600"
+          growth={dashboardData.conversionGrowth}
         />
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sales Chart */}
-        <div className="bg-white p-6 rounded-lg shadow lg:col-span-2 hover:shadow-lg transition-shadow duration-300">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+
+      {/* Sales Chart & Product Categories with enhanced visuals */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 mb-6">
+        {/* Sales Overview (Area Chart) */}
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow lg:col-span-2 hover:shadow-lg transition-all duration-300">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
             <div>
-              <h2 className="text-lg font-semibold">Sales Overview</h2>
-              <p className="text-sm text-gray-500">Monthly revenue statistics</p>
+              <h2 className="text-base sm:text-lg font-semibold flex items-center">
+                <DollarSign size={20} className="text-blue-500 mr-2" />
+                Sales Overview
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-500">
+                Revenue statistics by day
+              </p>
             </div>
-            <div className="flex mt-3 sm:mt-0 bg-gray-100 rounded-lg p-1">
-              <button 
-                className={`px-3 py-1 text-sm rounded-md ${activeTab === 'daily' ? 'bg-white shadow' : ''}`}
-                onClick={() => setActiveTab('daily')}
-              >
-                Daily
-              </button>
-              <button 
-                className={`px-3 py-1 text-sm rounded-md ${activeTab === 'weekly' ? 'bg-white shadow' : ''}`}
-                onClick={() => setActiveTab('weekly')}
-              >
-                Weekly
-              </button>
-              <button 
-                className={`px-3 py-1 text-sm rounded-md ${activeTab === 'monthly' ? 'bg-white shadow' : ''}`}
-                onClick={() => setActiveTab('monthly')}
-              >
-                Monthly
-              </button>
+            <div className="mt-2 sm:mt-0">
+              <select className="text-xs sm:text-sm border border-gray-200 rounded-lg px-2 py-1 bg-gray-50">
+                <option value="weekly">This Week</option>
+                <option value="monthly">This Month</option>
+                <option value="yearly">This Year</option>
+              </select>
             </div>
           </div>
-          <div className="h-64 md:h-80">
+          <div className="h-48 sm:h-64 md:h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={getActiveData()}>
+              <AreaChart
+                data={getSalesDataForChart()}
+                margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
+              >
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.1}/>
+                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EEE" />
-                <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                <Tooltip 
-                  formatter={(value) => [`$${value}`, 'Sales']} 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                <XAxis
+                  dataKey="name"  
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="sales" 
-                  stroke="#4F46E5" 
-                  strokeWidth={3} 
-                  fill="url(#colorSales)" 
-                  activeDot={{ r: 6 }} 
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `₹${value}`}
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                  width={isMobile ? 40 : 50}
+                />
+                <Tooltip
+                  formatter={(value) => [`₹${value}`, "Sales"]}
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "none",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="totalSales"
+                  stroke="#4F46E5"
+                  strokeWidth={isMobile ? 2 : 3}
+                  fill="url(#colorSales)"
+                  activeDot={{ r: isMobile ? 4 : 6 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Product Categories */}
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow duration-300">
-          <div className="flex justify-between items-center mb-6">
+        {/* Product Categories (PieChart) */}
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow hover:shadow-lg transition-all duration-300">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
             <div>
-              <h2 className="text-lg font-semibold">Product Categories</h2>
-              <p className="text-sm text-gray-500">Sales by category</p>
+              <h2 className="text-base sm:text-lg font-semibold flex items-center">
+                <ShoppingBag size={20} className="text-purple-500 mr-2" />
+                Product Categories
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-500">
+                Sales distribution by category
+              </p>
             </div>
-            <button className="text-gray-400 hover:text-gray-600">
-              <MoreHorizontal size={20} />
-            </button>
           </div>
-          <div className="h-64">
+          <div className="h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={categoryData}
+                  data={getCategoryDataForChart()}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
+                  innerRadius={isMobile ? 40 : 60}
+                  outerRadius={isMobile ? 60 : 80}
                   fill="#8884d8"
                   paddingAngle={5}
-                  dataKey="value"
-                  label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
+                  dataKey="value"    
+                  nameKey="name"
+                  label={
+                    isMobile
+                      ? null
+                      : ({ name, value, percent }) =>
+                          `${name} ₹${value} (${(percent * 100).toFixed(0)}%)`
+                  }
+                  labelLine={!isMobile}
                 >
-                  {categoryData.map((entry, index) => (
+                  {getCategoryDataForChart().map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
+                <Tooltip formatter={(value) => [`₹${value}`, "Sales"]} />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            {categoryData.map((item, index) => (
-              <div key={index} className="flex items-center">
-                <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                <span className="text-xs text-gray-600">{item.name}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
-      
-      {/* Recent Orders */}
-      <div className="mt-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-300">
-        <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center">
+
+      {/* Enhanced Recent Orders */}
+      <div className="bg-white rounded-xl shadow p-4 sm:p-6 transition-all duration-300 hover:shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
           <div>
-            <h2 className="text-lg font-semibold">Recent Orders</h2>
-            <p className="text-sm text-gray-500">Latest customer transactions</p>
+            <h2 className="text-lg font-semibold flex items-center">
+              <Clock size={20} className="text-indigo-500 mr-2" />
+              Recent Orders
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Overview of latest transactions
+            </p>
           </div>
-          <button className="mt-3 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-            <Calendar size={16} />
-            <span>View All</span>
-          </button>
+          
+          <div className="flex items-center mt-2 sm:mt-0 space-x-2">
+            <div className="flex flex-wrap gap-2 items-center">
+              <button 
+                onClick={() => setActiveFilter('all')}
+                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                  activeFilter === 'all' 
+                    ? 'bg-indigo-100 text-indigo-700 font-medium' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                All
+              </button>
+              <button 
+                onClick={() => setActiveFilter('pending')}
+                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                  activeFilter === 'pending' 
+                    ? 'bg-yellow-100 text-yellow-700 font-medium' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Pending
+              </button>
+              <button 
+                onClick={() => setActiveFilter('processing')}
+                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                  activeFilter === 'processing' 
+                    ? 'bg-blue-100 text-blue-700 font-medium' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Processing
+              </button>
+              <button 
+                onClick={() => setActiveFilter('completed')}
+                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                  activeFilter === 'completed' 
+                    ? 'bg-green-100 text-green-700 font-medium' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Completed
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {recentOrders.map((order, index) => (
-                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{order.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-medium">
-                        {order.customer.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm text-gray-700">{order.customer}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(order.status)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{order.amount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreHorizontal size={18} />
-                    </button>
-                  </td>
+
+        {filteredOrders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <ShoppingBag size={48} className="text-gray-300 mb-3" />
+            <p className="text-gray-500 font-medium">No orders found</p>
+            <p className="text-sm text-gray-400">Try changing your filter or check back later</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto mt-2">
+            <table className="w-full">
+              <thead className="bg-gray-50 rounded-lg">
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="p-4 border-t flex justify-center">
-          <div className="flex gap-1">
-            <button className="px-3 py-1 rounded-md bg-blue-100 text-blue-600 text-sm font-medium">1</button>
-            <button className="px-3 py-1 rounded-md hover:bg-gray-100 text-sm">2</button>
-            <button className="px-3 py-1 rounded-md hover:bg-gray-100 text-sm">3</button>
-            <span className="px-3 py-1 text-sm">...</span>
-            <button className="px-3 py-1 rounded-md hover:bg-gray-100 text-sm">10</button>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {(isTableExpanded ? filteredOrders : filteredOrders.slice(0, 5)).map((order) => (
+                  <tr 
+                    key={order._id} 
+                    className="text-sm hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      <span className="font-medium text-gray-900">{order._id?.substring(0, 8)}...</span>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-medium mr-2">
+                          {order.userId?.name ? order.userId.name.charAt(0).toUpperCase() : "?"}
+                        </div>
+                        <span>{order.userId?.name || "Anonymous"}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-gray-600">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full ${getStatusColor(order.orderStatus)}`}>
+                        {order.orderStatus}
+                      </span>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-right font-medium">
+                      ₹{order.totalAmount}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            
+            {filteredOrders.length > 5 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setIsTableExpanded(!isTableExpanded)}
+                  className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center mx-auto"
+                >
+                  {isTableExpanded ? "Show Less" : "View All Orders"}
+                  <ChevronRight size={16} className={`ml-1 transition-transform ${isTableExpanded ? "rotate-90" : ""}`} />
+                </button>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
