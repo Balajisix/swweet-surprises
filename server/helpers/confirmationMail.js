@@ -11,7 +11,7 @@ const sendOrderConfirmationEmail = async (userId, order) => {
 
     // Send the email using the existing transporter configuration
     await transporter.sendMail({
-      from: 'swweetsurprise@gmail.com',
+      from: '"Sweet Surprise 🎁" <swweetsurprise@gmail.com>',
       to: user.email,
       subject: `🎉 Order Confirmation - Order #${order._id}`,
       html: `
