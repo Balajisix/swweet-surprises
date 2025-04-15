@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Gift } from 'lucide-react';
 import axios from 'axios';
-const BACKEND_URL = "https://backend-api-ten-sigma.vercel.app";
-// const BACKEND_URL = "http://localhost:5000";
+import BACKEND_URL from '../../config/url';
 
 const ForgotPasswordEmail = () => {
   const { token } = useParams();
-  console.log(token);
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

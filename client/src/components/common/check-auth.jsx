@@ -3,12 +3,9 @@ import { Navigate, useLocation } from "react-router-dom";
 function CheckAuth({ isAuthenticated, authChecked, isLoading, user, children }) {
   const location = useLocation();
 
-  // If the auth state is still loading, don’t redirect yet.
   if (isLoading || !authChecked) {
-    return <div>Loading...</div>; // Or your skeleton/loader component
+    return <div>Loading...</div>;
   }
-  
-  console.log(location.pathname, isAuthenticated);
 
   // Allow unauthenticated access to specific public routes
   const publicRoutes = ["/auth/login", "/auth/register", "/auth/forgot-password"];

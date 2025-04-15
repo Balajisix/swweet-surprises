@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-const BACKEND_URL = "https://backend-api-ten-sigma.vercel.app";
-// const BACKEND_URL = "http://localhost:5000";
+import BACKEND_URL from '../../../config/url';
 
 const initialState = {
   isLoading: false,
@@ -12,7 +11,6 @@ const initialState = {
 export const fetchAllFilteredProducts = createAsyncThunk(
   "/products/fetchAllProducts",
   async ({ filterParams, sortParams }) => {
-    console.log(fetchAllFilteredProducts, "fetchAllFilteredProducts");
 
     const query = new URLSearchParams({
       ...filterParams,
@@ -22,8 +20,6 @@ export const fetchAllFilteredProducts = createAsyncThunk(
     const result = await axios.get(
       `${BACKEND_URL}/api/shop/products/get?${query}`
     );
-
-    console.log(result);
 
     return result?.data;
   }
