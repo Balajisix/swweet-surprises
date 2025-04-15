@@ -127,7 +127,7 @@ function ShoppingCheckout() {
     if (razorpayOrder && paymentMethod === "Razorpay") {
       if (typeof window !== "undefined" && window.Razorpay) {
         const options = {
-          key: process.env.RZP_ID,
+          key: 'rzp_test_BN58I09Ntf1QYq',
           amount: razorpayOrder.amount,
           currency: razorpayOrder.currency,
           name: "Sweet Surprises",
