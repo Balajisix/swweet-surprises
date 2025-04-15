@@ -3,11 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Package, MapPin, Heart, Settings, CreditCard, Gift } from "lucide-react";
 import Address from "@/components/shopping-view/address";
 import ShoppingOrders from "@/components/shopping-view/orders";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { getAllOrdersByUserId } from "@/store/shop/order-slice";
 
 function ShoppingAccount() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const orders = useSelector((state) => state.orders?.orderList || []);
+  const orders = useSelector((state) => state.shopOrder?.orderList) || [];
 
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState("orders");
@@ -16,6 +18,12 @@ function ShoppingAccount() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if(user?._id){
+      dispatch(getAllOrdersByUserId(user?._id));
+    }
+  }, [user, dispatch])
 
   // Handle tab change
   const handleTabChange = (value) => {
@@ -57,7 +65,7 @@ function ShoppingAccount() {
           <div className="flex flex-col items-center p-3 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
             <Package className="text-pink-600 mb-2" size={24} />
             <p className="text-gray-800 font-medium">{orders.length} Orders</p>
-            <p className="text-xs text-gray-500">This month</p>
+            <p className="text-xs text-gray-500">Your total orders</p>
           </div>
           <div className="flex flex-col items-center p-3 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
             <Heart className="text-pink-600 mb-2" size={24} />

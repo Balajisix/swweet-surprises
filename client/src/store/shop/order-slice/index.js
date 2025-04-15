@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 const BACKEND_URL = "https://backend-api-ten-sigma.vercel.app";
+// const BACKEND_URL = "http://localhost:5000";
 
 const initialState = {
   razorpayOrder: null, // will be set only for online payments

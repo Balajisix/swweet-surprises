@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 const BACKEND_URL = "https://backend-api-ten-sigma.vercel.app";
+// const BACKEND_URL = "http://localhost:5000";
 
 const initialState = {
   cartItems: [],

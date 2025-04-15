@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Gift } from 'lucide-react';
 import axios from 'axios';
 const BACKEND_URL = "https://backend-api-ten-sigma.vercel.app";
+// const BACKEND_URL = "http://localhost:5000";
 
 const ForgotPasswordEmail = () => {
   const { token } = useParams();
