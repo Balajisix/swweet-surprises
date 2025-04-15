@@ -22,6 +22,7 @@ import {
   Search,
   ChevronRight,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 
 // Adjust API URL as needed
@@ -32,6 +33,7 @@ function AdminDashboard() {
   const [isMobile, setIsMobile] = useState(false);
   const [isTableExpanded, setIsTableExpanded] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Data from backend
   const [dashboardData, setDashboardData] = useState({
@@ -48,7 +50,9 @@ function AdminDashboard() {
   });
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -171,8 +175,53 @@ function AdminDashboard() {
     return order.orderStatus?.toLowerCase() === activeFilter.toLowerCase();
   });
 
+  // Mobile-friendly order card component
+  const OrderCard = ({ order, isExpanded, onClick }) => (
+    <div 
+      className="bg-white rounded-lg shadow mb-3 overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
+      onClick={() => onClick(order)}
+    >
+      <div className="p-3 flex justify-between items-center">
+        <div className="flex items-center space-x-3">
+          <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-medium">
+            {order.userId?.name ? order.userId.name.charAt(0).toUpperCase() : "?"}
+          </div>
+          <div>
+            <div className="font-medium">{order.userId?.name || "Anonymous"}</div>
+            <div className="text-xs text-gray-500">
+              ID: {order._id?.substring(0, 8)}...
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col items-end">
+          <div className="font-bold">₹{order.totalAmount}</div>
+          <span className={`mt-1 px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus)}`}>
+            {order.orderStatus}
+          </span>
+        </div>
+      </div>
+      
+      {isExpanded && (
+        <div className="px-3 pb-3 pt-1 border-t border-gray-100">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="text-gray-500">Date:</span>
+            <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+          </div>
+          <div className="flex justify-between text-sm mb-1">
+            <span className="text-gray-500">Status:</span>
+            <span>{order.orderStatus}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Amount:</span>
+            <span className="font-medium">₹{order.totalAmount}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
-    <div className="p-2 sm:p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div className="p-2 sm:p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full">
       {/* Header with date */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
@@ -187,9 +236,9 @@ function AdminDashboard() {
             })}
           </p>
         </div>
-        <div className="mt-2 sm:mt-0 relative">
-          <div className="relative flex items-center bg-white rounded-lg shadow-sm px-3 py-2">
-            <Search size={16} className="text-gray-400 mr-2" />
+        <div className="mt-2 sm:mt-0 relative w-full sm:w-auto">
+          <div className="relative flex items-center bg-white rounded-lg shadow-sm px-3 py-2 w-full">
+            <Search size={16} className="text-gray-400 mr-2 flex-shrink-0" />
             <input
               type="text"
               placeholder="Search..."
@@ -345,7 +394,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Enhanced Recent Orders */}
+      {/* Enhanced Recent Orders - Responsive for Mobile */}
       <div className="bg-white rounded-xl shadow p-4 sm:p-6 transition-all duration-300 hover:shadow-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
           <div>
@@ -358,11 +407,12 @@ function AdminDashboard() {
             </p>
           </div>
           
-          <div className="flex items-center mt-2 sm:mt-0 space-x-2">
-            <div className="flex flex-wrap gap-2 items-center">
+          {/* Filter buttons row - Scrollable on mobile */}
+          <div className="flex items-center mt-2 sm:mt-0 w-full sm:w-auto">
+            <div className="flex gap-2 items-center overflow-x-auto pb-2 w-full sm:w-auto">
               <button 
                 onClick={() => setActiveFilter('all')}
-                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                className={`text-xs px-3 py-1 rounded-full transition-colors flex-shrink-0 ${
                   activeFilter === 'all' 
                     ? 'bg-indigo-100 text-indigo-700 font-medium' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -372,7 +422,7 @@ function AdminDashboard() {
               </button>
               <button 
                 onClick={() => setActiveFilter('pending')}
-                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                className={`text-xs px-3 py-1 rounded-full transition-colors flex-shrink-0 ${
                   activeFilter === 'pending' 
                     ? 'bg-yellow-100 text-yellow-700 font-medium' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -382,7 +432,7 @@ function AdminDashboard() {
               </button>
               <button 
                 onClick={() => setActiveFilter('processing')}
-                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                className={`text-xs px-3 py-1 rounded-full transition-colors flex-shrink-0 ${
                   activeFilter === 'processing' 
                     ? 'bg-blue-100 text-blue-700 font-medium' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -392,7 +442,7 @@ function AdminDashboard() {
               </button>
               <button 
                 onClick={() => setActiveFilter('completed')}
-                className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                className={`text-xs px-3 py-1 rounded-full transition-colors flex-shrink-0 ${
                   activeFilter === 'completed' 
                     ? 'bg-green-100 text-green-700 font-medium' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -411,62 +461,89 @@ function AdminDashboard() {
             <p className="text-sm text-gray-400">Try changing your filter or check back later</p>
           </div>
         ) : (
-          <div className="overflow-x-auto mt-2">
-            <table className="w-full">
-              <thead className="bg-gray-50 rounded-lg">
-                <tr>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {(isTableExpanded ? filteredOrders : filteredOrders.slice(0, 5)).map((order) => (
-                  <tr 
-                    key={order._id} 
-                    className="text-sm hover:bg-gray-50 transition-colors duration-150"
+          <>
+            {/* Mobile View: Card-based layout */}
+            <div className="sm:hidden mt-2">
+              {(isTableExpanded ? filteredOrders : filteredOrders.slice(0, 5)).map((order) => (
+                <OrderCard 
+                  key={order._id} 
+                  order={order} 
+                  isExpanded={selectedOrder?._id === order._id}
+                  onClick={(order) => setSelectedOrder(selectedOrder?._id === order._id ? null : order)}
+                />
+              ))}
+              
+              {filteredOrders.length > 5 && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => setIsTableExpanded(!isTableExpanded)}
+                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center mx-auto"
                   >
-                    <td className="px-3 py-4 whitespace-nowrap">
-                      <span className="font-medium text-gray-900">{order._id?.substring(0, 8)}...</span>
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-medium mr-2">
-                          {order.userId?.name ? order.userId.name.charAt(0).toUpperCase() : "?"}
-                        </div>
-                        <span>{order.userId?.name || "Anonymous"}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-gray-600">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full ${getStatusColor(order.orderStatus)}`}>
-                        {order.orderStatus}
-                      </span>
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-right font-medium">
-                      ₹{order.totalAmount}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    {isTableExpanded ? "Show Less" : "View All Orders"}
+                    <ChevronDown size={16} className={`ml-1 transition-transform ${isTableExpanded ? "rotate-180" : ""}`} />
+                  </button>
+                </div>
+              )}
+            </div>
             
-            {filteredOrders.length > 5 && (
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => setIsTableExpanded(!isTableExpanded)}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center mx-auto"
-                >
-                  {isTableExpanded ? "Show Less" : "View All Orders"}
-                  <ChevronRight size={16} className={`ml-1 transition-transform ${isTableExpanded ? "rotate-90" : ""}`} />
-                </button>
-              </div>
-            )}
-          </div>
+            {/* Desktop View: Table-based layout */}
+            <div className="hidden sm:block overflow-x-auto mt-2">
+              <table className="w-full">
+                <thead className="bg-gray-50 rounded-lg">
+                  <tr>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {(isTableExpanded ? filteredOrders : filteredOrders.slice(0, 5)).map((order) => (
+                    <tr 
+                      key={order._id} 
+                      className="text-sm hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <span className="font-medium text-gray-900">{order._id?.substring(0, 8)}...</span>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-medium mr-2">
+                            {order.userId?.name ? order.userId.name.charAt(0).toUpperCase() : "?"}
+                          </div>
+                          <span>{order.userId?.name || "Anonymous"}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-gray-600">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full ${getStatusColor(order.orderStatus)}`}>
+                          {order.orderStatus}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-right font-medium">
+                        ₹{order.totalAmount}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {filteredOrders.length > 5 && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => setIsTableExpanded(!isTableExpanded)}
+                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center mx-auto"
+                  >
+                    {isTableExpanded ? "Show Less" : "View All Orders"}
+                    <ChevronRight size={16} className={`ml-1 transition-transform ${isTableExpanded ? "rotate-90" : ""}`} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
