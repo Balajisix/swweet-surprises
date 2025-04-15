@@ -23,9 +23,7 @@ function ShoppingCheckout() {
   const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
   const [isPaymentStart, setIsPaymentStart] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState(1);
-  // New state: paymentMethod can be "Razorpay" (online) or "COD"
   const [paymentMethod, setPaymentMethod] = useState("Razorpay");
-  // New state to flag when the order is completed along with order details (if needed)
   const [orderCompleted, setOrderCompleted] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -100,7 +98,7 @@ function ShoppingCheckout() {
           toast({
             title: "COD Order placed successfully!",
             description:
-              "Your order is confirmed and will be processed shortly.",
+              "Your order is confirmed and a confirmation email has been sent.",
             variant: "default",
           });
           // Mark order as complete so that UI updates accordingly.
@@ -147,7 +145,7 @@ function ShoppingCheckout() {
               if (res?.payload?.success) {
                 toast({
                   title: "Payment successful. Order confirmed!",
-                  description: "Your sweet surprises are on the way!",
+                  description: "Your order is confirmed and a confirmation email has been sent.",
                   variant: "default",
                 });
                 // Mark order as complete in the UI.
@@ -226,7 +224,7 @@ function ShoppingCheckout() {
             Order Confirmed!
           </h1>
           <p className="text-gray-600 mb-4">
-            Your order has been successfully placed.
+            Your order has been successfully placed and verification mail has sent.
           </p>
           <p className="text-gray-600 mb-4">
             Order Number: <span className="font-bold">{orderId}</span>
@@ -243,7 +241,6 @@ function ShoppingCheckout() {
     );
   }
 
-  // Otherwise, render the checkout flow.
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-br from-pink-50 via-white to-purple-50 overflow-x-hidden">
       <div className="absolute top-0 right-0 w-1/4 h-64 bg-pink-100 rounded-full md:-mr-12 md:-mt-32 -mr-0 -mt-0 opacity-50"></div>
