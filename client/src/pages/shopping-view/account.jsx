@@ -7,6 +7,8 @@ import { useSelector } from "react-redux";
 
 function ShoppingAccount() {
   const { user } = useSelector((state) => state.auth);
+  const orders = useSelector((state) => state.orders?.orderList || []);
+
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState("orders");
   
@@ -54,7 +56,7 @@ function ShoppingAccount() {
         <div className="bg-white rounded-xl shadow-lg border border-pink-100 p-4 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col items-center p-3 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
             <Package className="text-pink-600 mb-2" size={24} />
-            <p className="text-gray-800 font-medium">3 Orders</p>
+            <p className="text-gray-800 font-medium">{orders.length} Orders</p>
             <p className="text-xs text-gray-500">This month</p>
           </div>
           <div className="flex flex-col items-center p-3 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
