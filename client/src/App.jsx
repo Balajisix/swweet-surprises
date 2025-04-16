@@ -1,34 +1,31 @@
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-
+import { Route, Routes, Navigate } from "react-router-dom";
 import AuthLayout from "./components/auth/layout";
 import AuthLogin from "./pages/auth/login";
 import ForgotPass from "./pages/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import AuthRegister from "./pages/auth/register";
-
 import AdminLayout from "./components/admin-view/layout";
 import AdminDashboard from "./pages/admin-view/dashboard";
 import AdminProducts from "./pages/admin-view/products";
 import AdminOrders from "./pages/admin-view/orders";
 import AdminFeatures from "./pages/admin-view/features";
-
 import ShoppingLayout from "./components/shopping-view/layout";
+import NotFound from "./pages/not-found";
 import ShoppingHome from "./pages/shopping-view/home";
 import ShoppingListing from "./pages/shopping-view/listing";
 import ShoppingCheckout from "./pages/shopping-view/checkout";
 import ShoppingAccount from "./pages/shopping-view/account";
+import CheckAuth from "./components/common/check-auth";
+import UnauthPage from "./pages/unauth-page";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { checkAuth } from "./store/auth-slice";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from "react-router-dom";
 import PaypalReturnPage from "./pages/shopping-view/paypal-return";
 import PaymentSuccessPage from "./pages/shopping-view/payment-success";
 import SearchProducts from "./pages/shopping-view/search";
 import ProductDetailsPage from "./components/shopping-view/product-details";
-
-import NotFound from "./pages/not-found";
-import UnauthPage from "./pages/unauth-page";
-
-import { checkAuth } from "./store/auth-slice";
-import { Skeleton } from "@/components/ui/skeleton";
 
 function App() {
   const { user, isAuthenticated, isLoading, authChecked } = useSelector(
@@ -41,31 +38,8 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  // ✅ Checkout Protected Component
-  const ProtectedRoute = ({ children }) => {
-    if (!authChecked) {
-      return <Skeleton className="w-[800px] bg-black h-[600px]" />;
-    }
-
-    return isAuthenticated ? (
-      <>{children}</>
-    ) : (
-      <Navigate to="/auth/login" state={{ from: location }} replace />
-    );
-  };
-
-  // ✅ Admin Protected Component
-  const AdminProtected = ({ children }) => {
-    if (!authChecked) {
-      return <Skeleton className="w-[800px] bg-black h-[600px]" />;
-    }
-
-    return user?.role === "admin" ? (
-      <>{children}</>
-    ) : (
-      <Navigate to="/unauth-page" replace />
-    );
-  };
+  if (isLoading || !authChecked)
+    return <Skeleton className="w-[800px] bg-black h-[600px]" />;
 
   return (
     <div className="flex flex-col overflow-hidden bg-white">
@@ -91,9 +65,11 @@ function App() {
           <Route
             path="checkout"
             element={
-              <ProtectedRoute>
+              isAuthenticated ? (
                 <ShoppingCheckout />
-              </ProtectedRoute>
+              ) : (
+                <Navigate to="/auth/login" state={{ from: location }} replace />
+              )
             }
           />
           <Route path="account" element={<ShoppingAccount />} />
@@ -102,13 +78,18 @@ function App() {
           <Route path="search" element={<SearchProducts />} />
         </Route>
 
-        {/* 🛠 Admin Routes (Protected) */}
+        {/* 🛠 Admin Routes */}
         <Route
           path="/admin"
           element={
-            <AdminProtected>
+            <CheckAuth
+              isAuthenticated={isAuthenticated}
+              user={user}
+              isLoading={isLoading}
+              authChecked={authChecked}
+            >
               <AdminLayout />
-            </AdminProtected>
+            </CheckAuth>
           }
         >
           <Route path="dashboard" element={<AdminDashboard />} />
