@@ -6,7 +6,7 @@ const getRecentorders = async(req, res) => {
       .sort({ createdAt: -1 })
       .limit(5)
       .populate("cartItems.productId", "title price image")
-      .populate("userId", "name email");
+      .populate("userId", "userName email");
 
     res.status(200).json({ success: true, data: orders });
   } catch (e) {
@@ -20,7 +20,7 @@ const getAllOrdersOfAllUsers = async (req, res) => {
     // Populate product details for each order
     const orders = await Order.find({})
       .populate("cartItems.productId", "title price image") // Populate product details (title, price, and image)
-      .populate("userId", "name email"); // Optionally populate user details (name and email)
+      .populate("userId", "userName email"); // Optionally populate user details (name and email)
 
     if (!orders.length) {
       return res.status(404).json({
@@ -49,7 +49,7 @@ const getOrderDetailsForAdmin = async (req, res) => {
     // Find order by ID and populate product details
     const order = await Order.findById(id)
       .populate("cartItems.productId", "title price description image") // Include product details
-      .populate("userId", "name email"); // Optionally include user details
+      .populate("userId", "userName email"); // Optionally include user details
 
     if (!order) {
       return res.status(404).json({

@@ -11,6 +11,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+
 import {
   Activity,
   ArrowDown,
@@ -25,9 +26,11 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-// Adjust API URL as needed
+// API URL
 const API_BASE_URL = "https://backend-api-ten-sigma.vercel.app/api/admin";
 const API_ORDERS_URL = "https://backend-api-ten-sigma.vercel.app/api/admin/orders/recent";
+// const API_BASE_URL = "http://localhost:5000/api/admin";
+// const API_ORDERS_URL = "http://localhost:5000/api/admin/orders/recent";
 
 function AdminDashboard() {
   const [isMobile, setIsMobile] = useState(false);
@@ -40,13 +43,13 @@ function AdminDashboard() {
     totalSales: 0,
     totalOrders: 0,
     totalUsers: 0,
-    conversionRate: 0, // fallback
+    conversionRate: 0,
     salesGrowth: 0,
     ordersGrowth: 0,
     usersGrowth: 0,
     conversionGrowth: 0,
-    graphData: [], // The daily or overall data, each item: { _id: 'YYYY-MM-DD', totalSales: number }
-    productCategoryData: [], // e.g. [{ category: "Electronics", totalSales: 5000 }, ...]
+    graphData: [], 
+    productCategoryData: [],
   });
 
   useEffect(() => {
@@ -75,7 +78,9 @@ function AdminDashboard() {
             usersGrowth: data.usersGrowth || 0,
             conversionGrowth: data.conversionGrowth || 0,
             graphData: data.graphData || [],
-            productCategoryData: data.productCategoryData || [],
+            productCategoryData:  [{ "category": "Mugs", "totalSales": 5000 },
+              { "category": "Photo frame", "totalSales": 8089 },
+              { "category": "Keychains", "totalSales": 10000 }],
           });
         }
       } catch (err) {
@@ -103,8 +108,7 @@ function AdminDashboard() {
     fetchRecentOrders();
   }, []);
 
-  // Recharts requires an array of objects; each object has
-  // `_id` for X-axis, `totalSales` for Y-axis
+  // Recharts 
   const getSalesDataForChart = () => {
     return dashboardData.graphData.map((item) => ({
       name: item._id,
@@ -112,16 +116,15 @@ function AdminDashboard() {
     }));
   };
 
-  // Convert productCategoryData into the format for PieChart
-  // e.g. [{ name: 'Electronics', value: 5000 }, ...]
+  // ProductCategoryData
   const getCategoryDataForChart = () => {
-    return dashboardData.productCategoryData.map((cat) => ({
+    const data = dashboardData.productCategoryData.map((cat) => ({
       name: cat.category,
       value: cat.totalSales,
     }));
+    return data;
   };
 
-  // Get status color based on order status
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "completed":
@@ -139,7 +142,7 @@ function AdminDashboard() {
     }
   };
 
-  // A simple stat card component with animation
+  // Top Stats
   const StatCard = ({ title, value, icon, color, growth }) => (
     <div className="bg-white rounded-xl shadow p-4 flex flex-col relative overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
       <div className="absolute right-0 top-0 h-full w-1/3 opacity-5 flex items-center justify-center">
@@ -169,7 +172,7 @@ function AdminDashboard() {
 
   const COLORS = ["#4F46E5", "#EC4899", "#10B981", "#F59E0B", "#6B7280", "#E879F9"];
 
-  // Filter orders based on activeFilter
+  // Filter orders
   const filteredOrders = orders.filter(order => {
     if (activeFilter === 'all') return true;
     return order.orderStatus?.toLowerCase() === activeFilter.toLowerCase();
@@ -184,10 +187,10 @@ function AdminDashboard() {
       <div className="p-3 flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-medium">
-            {order.userId?.name ? order.userId.name.charAt(0).toUpperCase() : "?"}
+            {order?.userId?.userName ? order?.userId?.userName.charAt(0).toUpperCase() : "?"}
           </div>
           <div>
-            <div className="font-medium">{order.userId?.name || "Anonymous"}</div>
+            <div className="font-medium">{order?.userId?.userName || "Anonymous"}</div>
             <div className="text-xs text-gray-500">
               ID: {order._id?.substring(0, 8)}...
             </div>
@@ -248,7 +251,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards with hover effects */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-5 sm:mb-6">
         <StatCard
           title="Total Sales"
@@ -280,7 +283,7 @@ function AdminDashboard() {
         />
       </div>
 
-      {/* Sales Chart & Product Categories with enhanced visuals */}
+      {/* Sales Chart & Product Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 mb-6">
         {/* Sales Overview (Area Chart) */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow lg:col-span-2 hover:shadow-lg transition-all duration-300">
@@ -394,7 +397,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Enhanced Recent Orders - Responsive for Mobile */}
+      {/* Orders Section */}
       <div className="bg-white rounded-xl shadow p-4 sm:p-6 transition-all duration-300 hover:shadow-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
           <div>
@@ -510,9 +513,9 @@ function AdminDashboard() {
                       <td className="px-3 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-medium mr-2">
-                            {order.userId?.name ? order.userId.name.charAt(0).toUpperCase() : "?"}
+                            {order?.userId?.userName ? order?.userId?.userName.charAt(0).toUpperCase() : "?"}
                           </div>
-                          <span>{order.userId?.name || "Anonymous"}</span>
+                          <span>{order?.userId?.userName || "Anonymous"}</span>
                         </div>
                       </td>
                       <td className="px-3 py-4 whitespace-nowrap text-gray-600">

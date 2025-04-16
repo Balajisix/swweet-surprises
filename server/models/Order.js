@@ -1,17 +1,21 @@
 const mongoose = require("mongoose");
 
 const OrderSchema = new mongoose.Schema({
-  userId: String,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
   cartId: String,
   cartItems: [
     {
       productId: {
-        type: mongoose.Schema.Types.ObjectId, // Reference to Product model
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
-      title: String, // You can keep this if you want to save the title at order creation time
-      image: String, // Optional: You can still save image as a static copy
-      price: String, // Optional: Keep price if you don't want to recalculate from the product
+      title: String, 
+      image: String, 
+      price: String, 
       quantity: Number,
     },
   ],

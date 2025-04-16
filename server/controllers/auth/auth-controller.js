@@ -73,7 +73,7 @@ const loginUser = async (req, res) => {
       httpOnly: true, 
       secure: true,
       sameSite: "Strict",
-      domain: ".vercel.app",
+      // domain: ".vercel.app",
       maxAge: 60 * 60 * 1000
     }).json({
       success: true,
@@ -122,7 +122,6 @@ const resetPassword = async (req, res) => {
 const updatePassword = async (req, res) => {
   const { token } = req.params; // Extract token from the route parameters
   const { newPassword } = req.body; // Extract the new password from the request body
-  //console.log(token, newPassword);
   try {
       // Validate input
       if (!newPassword) {
