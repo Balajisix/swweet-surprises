@@ -33,7 +33,9 @@ export const loginUser = createAsyncThunk(
         withCredentials: true,
       }
     );
-    return response.data;
+    if (response.data.success) {
+      dispatch(checkAuth()); // Trigger the checkAuth action
+    }
   }
 );
 
