@@ -50,10 +50,6 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-});
-
 app.use(cookieParser());
 app.use(express.json());
 app.use("/api/auth", authRouter);
