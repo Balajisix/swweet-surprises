@@ -33,9 +33,7 @@ export const loginUser = createAsyncThunk(
         withCredentials: true,
       }
     );
-    if (response.data.success) {
-      dispatch(checkAuth()); // Trigger the checkAuth action
-    }
+    return response.data;
   }
 );
 
@@ -55,20 +53,17 @@ export const logoutUser = createAsyncThunk(
 
 export const checkAuth = createAsyncThunk(
   "/auth/checkauth",
-  async (_, { dispatch }) => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/auth/check-auth`, {
+  async () => {
+    const response = await axios.get(
+      `${BACKEND_URL}/api/auth/check-auth`, {
         withCredentials: true,
-      });
-      const data = response.data;
-      if (data.success) {
-        // Save user to localStorage
-        localStorage.setItem("user", JSON.stringify(data.user));
+        headers: {
+          "Cache-Control":
+            "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
       }
-      return data;
-    } catch (err) {
-      return { success: false };
-    }
+    );
+    return response.data;
   }
 );
 
