@@ -15,7 +15,7 @@ function AdminHeader({ setOpen }) {
       setIsSmallScreen(window.innerWidth < 768);
     };
     
-    handleResize(); // Set initial value
+    handleResize();
     window.addEventListener('resize', handleResize);
     
     return () => {
@@ -40,7 +40,7 @@ function AdminHeader({ setOpen }) {
         <span className="sr-only">Toggle Menu</span>
       </Button>
 
-      {/* Centered Title - Responsive text size */}
+      {/* Swweet Surprise Title */}
       <div className="flex-1 text-center">
         <h1
           className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-transparent bg-clip-text animate-gradient-move hover:scale-105 transition-transform duration-500 cursor-pointer truncate px-2"
@@ -49,7 +49,7 @@ function AdminHeader({ setOpen }) {
         </h1>
       </div>
 
-      {/* Logout Button - Responsive size */}
+      {/* Logout Button */}
       <div className="flex justify-end">
         {isSmallScreen ? (
           <Button

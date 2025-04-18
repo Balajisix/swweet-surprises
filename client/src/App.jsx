@@ -44,10 +44,10 @@ function App() {
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <Routes>
-        {/* 🚀 Redirect root "/" to shop/home */}
+        {/* Redirect root "/" to shop/home */}
         <Route path="/" element={<Navigate to="/shop/home" replace />} />
 
-        {/* 🔐 Auth Routes */}
+        {/* Auth Routes */}
         <Route path="/auth" element={<AuthLayout />}>
           <Route index element={<Navigate to="login" replace />} />
           <Route path="login" element={<AuthLogin />} />
@@ -57,7 +57,7 @@ function App() {
 
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* 🛒 Shopping Routes */}
+        {/* Shopping Routes */}
         <Route path="/shop" element={<ShoppingLayout />}>
           <Route path="home" element={<ShoppingHome />} />
           <Route path="productpage" element={<ProductDetailsPage />} />
@@ -78,7 +78,7 @@ function App() {
           <Route path="search" element={<SearchProducts />} />
         </Route>
 
-        {/* 🛠 Admin Routes */}
+        {/* Admin Routes */}
         <Route
           path="/admin"
           element={

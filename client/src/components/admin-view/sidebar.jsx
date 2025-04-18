@@ -68,7 +68,7 @@ function AdminSideBar({ open, setOpen }) {
       setIsMobile(window.innerWidth < 768);
     };
     
-    handleResize(); // Set initial value
+    handleResize();
     window.addEventListener('resize', handleResize);
     
     return () => {
@@ -78,7 +78,7 @@ function AdminSideBar({ open, setOpen }) {
 
   return (
     <Fragment>
-      {/* Mobile Sidebar (Sheet) */}
+      {/* Mobile Sidebar */}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-56 sm:w-64 p-4">
           <div className="flex flex-col h-full">

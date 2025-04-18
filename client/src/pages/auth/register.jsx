@@ -18,6 +18,8 @@ function AuthRegister() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const isFormValid =  formData.userName.trim() !== "" && formData.email.trim() !== "" && formData.password.trim() !== "";
+
   function onSubmit(event) {
     event.preventDefault();
     dispatch(registerUser(formData)).then((data) => {
@@ -57,6 +59,7 @@ function AuthRegister() {
         formData={formData}
         setFormData={setFormData}
         onSubmit={onSubmit}
+        isBtnDisabled={!isFormValid}
       />
       <div className="text-center text-pink-600 mt-4">
         <p className="text-sm">We’re excited to have you join us!</p>

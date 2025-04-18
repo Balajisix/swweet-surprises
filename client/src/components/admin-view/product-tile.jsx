@@ -11,7 +11,7 @@ function AdminProductTile({
   return (
     <Card className="w-full max-w-sm mx-auto bg-white shadow-lg rounded-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
       <div>
-        {/* Product Image Section with Hover Effect */}
+        {/* Product Image Section */}
         <div className="relative group">
           <img
             src={product?.image}

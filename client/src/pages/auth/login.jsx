@@ -19,6 +19,7 @@ function AuthLogin() {
   const location = useLocation();
 
   const from = location.state?.from?.pathname;
+  const isFormValid = formData.email.trim() !== "" && formData.password.trim() !== "";
 
   function onSubmit(event) {
     event.preventDefault();
@@ -73,6 +74,7 @@ function AuthLogin() {
         formData={formData}
         setFormData={setFormData}
         onSubmit={onSubmit}
+        isBtnDisabled={!isFormValid}
       />
       <div className="text-center mt-4">
         <Link

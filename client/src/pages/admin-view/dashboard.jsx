@@ -26,11 +26,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-// API URL
-const API_BASE_URL = "https://backend-api-ten-sigma.vercel.app/api/admin";
-const API_ORDERS_URL = "https://backend-api-ten-sigma.vercel.app/api/admin/orders/recent";
-// const API_BASE_URL = "http://localhost:5000/api/admin";
-// const API_ORDERS_URL = "http://localhost:5000/api/admin/orders/recent";
+import BACKEND_URL from '../../config/url';
 
 function AdminDashboard() {
   const [isMobile, setIsMobile] = useState(false);
@@ -65,7 +61,7 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/dashboard-stats`);
+        const res = await fetch(`${BACKEND_URL}/api/admin/dashboard-stats`);
         const data = await res.json();
         if (data.success) {
           setDashboardData({
@@ -95,7 +91,7 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchRecentOrders = async () => {
       try {
-        const response = await fetch(API_ORDERS_URL);
+        const response = await fetch(`${BACKEND_URL}/api/admin/orders/recent`);
         const data = await response.json();
         if (data.success) {
           // Expecting data.data to be an array of recent orders
