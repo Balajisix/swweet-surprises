@@ -1,7 +1,7 @@
 # 🛍️ Swweet-Surprises
 
 ## 📌 Description  
-This is a **full-stack e-commerce application** built using the **MERN stack with TypeScript**. The platform allows users to **browse products, add them to the cart, make secure payments via PayPal, track orders, and manage user accounts**. The backend is deployed on **Vercel** and handles authentication, orders, and payments.
+This is a **full-stack e-commerce application** built using the **MERN stack with JavaScript**. The platform allows users to **browse products, add them to the cart, make secure payments via Razorpay, track orders, and manage user accounts**. The backend is deployed on **Vercel** and handles authentication, orders, and payments.
 
 ---
 
@@ -9,7 +9,7 @@ This is a **full-stack e-commerce application** built using the **MERN stack wit
 - **Frontend:** React.js, Redux, Tailwind CSS  
 - **Backend:** Node.js, Express.js, MongoDB  
 - **Authentication:** JWT (JSON Web Tokens)
-- **Payment Gateway:** PayPal API  
+- **Payment Gateway:** Razorpay API  
 - **Deployment:** Vercel (Frontend & Backend)  
 
 ---
