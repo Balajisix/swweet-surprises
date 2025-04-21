@@ -21,6 +21,7 @@ import { Badge } from "../ui/badge";
 import { Search, Filter, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { useNavigate } from "react-router-dom";
 
 function AdminOrdersView() {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
@@ -30,6 +31,7 @@ function AdminOrdersView() {
   const [pageSize, setPageSize] = useState(10);
   const { orderList, orderDetails, loading } = useSelector((state) => state.adminOrder);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Filter orders based on search and status filter
   const filteredOrders = orderList?.filter(order => {
@@ -184,22 +186,13 @@ function AdminOrdersView() {
                           ₹{orderItem?.totalAmount}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Dialog
-                            open={openDetailsDialog}
-                            onOpenChange={() => {
-                              setOpenDetailsDialog(false);
-                              dispatch(resetOrderDetails());
-                            }}
-                          >
                             <Button
-                              onClick={() => handleFetchOrderDetails(orderItem?._id)}
+                              onClick={() => navigate(`/admin/orders/${orderItem?._id}`)}
                               size="sm"
                               className="text-xs px-3"
                             >
                               Details
                             </Button>
-                            <AdminOrderDetailsView orderDetails={orderDetails} />
-                          </Dialog>
                         </TableCell>
                       </TableRow>
                     ))}
