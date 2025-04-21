@@ -345,7 +345,7 @@ function ShoppingCheckout() {
               </h2>
 
               {cartItems && cartItems.items && cartItems.items.length > 0 ? (
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-1 md:pr-2">
+                <div className="space-y-4">
                   {cartItems.items.map((item, index) => (
                     <UserCartItemsContent
                       key={index}
