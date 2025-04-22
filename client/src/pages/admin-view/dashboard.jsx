@@ -20,7 +20,6 @@ import {
   ShoppingBag,
   Users,
   Calendar,
-  Search,
   ChevronRight,
   Clock,
   ChevronDown,
@@ -234,16 +233,6 @@ function AdminDashboard() {
               day: 'numeric'
             })}
           </p>
-        </div>
-        <div className="mt-2 sm:mt-0 relative w-full sm:w-auto">
-          <div className="relative flex items-center bg-white rounded-lg shadow-sm px-3 py-2 w-full">
-            <Search size={16} className="text-gray-400 mr-2 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="text-sm border-none outline-none bg-transparent w-full"
-            />
-          </div>
         </div>
       </div>
 
