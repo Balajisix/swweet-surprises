@@ -4,7 +4,8 @@ const OrderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: true,
+    index: true,
   },
   cartId: String,
   cartItems: [
@@ -12,10 +13,11 @@ const OrderSchema = new mongoose.Schema({
       productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
+        index: true,
       },
-      title: String, 
-      image: String, 
-      price: String, 
+      title: String,
+      image: String,
+      price: String,
       quantity: Number,
     },
   ],
@@ -36,5 +38,7 @@ const OrderSchema = new mongoose.Schema({
   paymentId: String,
   payerId: String,
 }, { timestamps: true });
+
+OrderSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model("Order", OrderSchema);
