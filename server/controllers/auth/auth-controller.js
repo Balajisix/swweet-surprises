@@ -73,7 +73,7 @@ const loginUser = async (req, res) => {
       httpOnly: true, 
       secure: true,
       sameSite: 'Strict',
-      domain: ".vercel.app",
+      // domain: ".vercel.app",
       maxAge: 30 * 24 * 60 * 60 * 1000
     }).json({
       success: true,

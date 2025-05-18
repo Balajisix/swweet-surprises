@@ -29,8 +29,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: "https://swweet-surprises.vercel.app",
-    // origin: "http://localhost:5173",
+    // origin: "https://swweet-surprises.vercel.app",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: [
       "Content-Type",
@@ -63,5 +63,5 @@ app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
-// app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
-module.exports = app;
+app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+// module.exports = app;
