@@ -459,7 +459,7 @@ function AdminOrderDetailsView() {
                           </span>
                         </div>
                         <p className="text-xs text-gray-500">
-                          {/* This would ideally use the timestamp from the status update */}
+                          {/* A timestamp for updation */}
                           {new Date().toLocaleString('en-US', {
                             year: 'numeric',
                             month: 'short',
@@ -479,7 +479,7 @@ function AdminOrderDetailsView() {
                           <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">Delivered</span>
                         </div>
                         <p className="text-xs text-gray-500">
-                          {/* This would ideally use the timestamp from the delivery */}
+                          {/* A timestamp updation for delivery */}
                           {new Date().toLocaleString('en-US', {
                             year: 'numeric',
                             month: 'short',

@@ -13,7 +13,7 @@ function ShoppingProductTile({
       {/* Product Image Section */}
       <div onClick={() => handleGetProductDetails(product?._id)} className="cursor-pointer">
         <div className="relative group">
-          {/* Product Image with zoom effect */}
+          {/* Product Image */}
           <img
             src={product?.image}
             alt={product?.title}
