@@ -1,10 +1,8 @@
 const Order = require("../../models/Order");
 const User = require("../../models/User");
-const Product = require("../../models/Product");
 
 const getAdminDashboardStats = async (req, res) => {
   try {
-    // Execute all aggregate/count queries in parallel
     const [
       totalOrders,
       totalUsers,

@@ -120,15 +120,13 @@ const resetPassword = async (req, res) => {
 
 // update password
 const updatePassword = async (req, res) => {
-  const { token } = req.params; // Extract token from the route parameters
-  const { newPassword } = req.body; // Extract the new password from the request body
+  const { token } = req.params;
+  const { newPassword } = req.body;
   try {
-      // Validate input
       if (!newPassword) {
           return res.status(400).json({ message: 'New password is required' });
       }
 
-      // Fetch the user by ID
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.userId;
 
@@ -137,15 +135,11 @@ const updatePassword = async (req, res) => {
           return res.status(404).json({ message: 'User not found' });
       }
 
-      // Hash the new password
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-      // // Update the user's password
       user.password = hashedPassword;
-      //user.password = newPassword;
       await user.save();
 
-      // Respond with success
       res.status(200).json({ message: 'Password has been successfully reset' });
   } catch (error) {
       console.error('Error resetting password:', error);

@@ -20,7 +20,6 @@ const handleImageUpload = async (req, res) => {
   }
 };
 
-//add a new product
 const addProduct = async (req, res) => {
   try {
     const {
@@ -63,8 +62,6 @@ const addProduct = async (req, res) => {
   }
 };
 
-//fetch all products
-
 const fetchAllProducts = async (req, res) => {
   try {
     const listOfProducts = await Product.find({});
@@ -81,7 +78,6 @@ const fetchAllProducts = async (req, res) => {
   }
 };
 
-//edit a product
 const editProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -97,7 +93,7 @@ const editProduct = async (req, res) => {
       averageReview,
     } = req.body;
 
-    let findProduct = await Product.findById(id);
+    let findProduct = await Product.findByIdAndUpdate(id);
     if (!findProduct)
       return res.status(404).json({
         success: false,
@@ -129,7 +125,6 @@ const editProduct = async (req, res) => {
   }
 };
 
-//delete a product
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;

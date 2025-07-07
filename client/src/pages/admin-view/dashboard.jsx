@@ -93,7 +93,6 @@ function AdminDashboard() {
         const response = await fetch(`${BACKEND_URL}/api/admin/orders/recent`);
         const data = await response.json();
         if (data.success) {
-          // Expecting data.data to be an array of recent orders
           setOrders(data.data);
         }
       } catch (error) {
@@ -103,7 +102,6 @@ function AdminDashboard() {
     fetchRecentOrders();
   }, []);
 
-  // Recharts 
   const getSalesDataForChart = () => {
     return dashboardData.graphData.map((item) => ({
       name: item._id,
@@ -111,7 +109,6 @@ function AdminDashboard() {
     }));
   };
 
-  // ProductCategoryData
   const getCategoryDataForChart = () => {
     const data = dashboardData.productCategoryData.map((cat) => ({
       name: cat.category,
@@ -137,7 +134,6 @@ function AdminDashboard() {
     }
   };
 
-  // Top Stats
   const StatCard = ({ title, value, icon, color, growth }) => (
     <div className="bg-white rounded-xl shadow p-4 flex flex-col relative overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
       <div className="absolute right-0 top-0 h-full w-1/3 opacity-5 flex items-center justify-center">
@@ -167,13 +163,11 @@ function AdminDashboard() {
 
   const COLORS = ["#4F46E5", "#EC4899", "#10B981", "#F59E0B", "#6B7280", "#E879F9"];
 
-  // Filter orders
   const filteredOrders = orders.filter(order => {
     if (activeFilter === 'all') return true;
     return order.orderStatus?.toLowerCase() === activeFilter.toLowerCase();
   });
 
-  // Mobile-friendly order card component
   const OrderCard = ({ order, isExpanded, onClick }) => (
     <div 
       className="bg-white rounded-lg shadow mb-3 overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
@@ -220,7 +214,6 @@ function AdminDashboard() {
 
   return (
     <div className="p-2 sm:p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full">
-      {/* Header with date */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Admin Dashboard</h1>
@@ -236,7 +229,6 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-5 sm:mb-6">
         <StatCard
           title="Total Sales"
@@ -268,9 +260,7 @@ function AdminDashboard() {
         />
       </div>
 
-      {/* Sales Chart & Product Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 mb-6">
-        {/* Sales Overview (Area Chart) */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow lg:col-span-2 hover:shadow-lg transition-all duration-300">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
             <div>
@@ -337,7 +327,6 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Product Categories (PieChart) */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow hover:shadow-lg transition-all duration-300">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
             <div>
@@ -382,7 +371,6 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Orders Section */}
       <div className="bg-white rounded-xl shadow p-4 sm:p-6 transition-all duration-300 hover:shadow-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
           <div>
@@ -395,7 +383,6 @@ function AdminDashboard() {
             </p>
           </div>
           
-          {/* Filter buttons row - Scrollable on mobile */}
           <div className="flex items-center mt-2 sm:mt-0 w-full sm:w-auto">
             <div className="flex gap-2 items-center overflow-x-auto pb-2 w-full sm:w-auto">
               <button 
@@ -450,7 +437,6 @@ function AdminDashboard() {
           </div>
         ) : (
           <>
-            {/* Mobile View: Card-based layout */}
             <div className="sm:hidden mt-2">
               {(isTableExpanded ? filteredOrders : filteredOrders.slice(0, 5)).map((order) => (
                 <OrderCard 
@@ -474,7 +460,6 @@ function AdminDashboard() {
               )}
             </div>
             
-            {/* Desktop View: Table-based layout */}
             <div className="hidden sm:block overflow-x-auto mt-2">
               <table className="w-full">
                 <thead className="bg-gray-50 rounded-lg">
